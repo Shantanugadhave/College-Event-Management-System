@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ticket Verification | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .verification-card {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      background: #ffffff;
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+    }
+    .ticket-header {
+      padding: 1.5rem;
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+    .ticket-header.status-valid {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .ticket-header.status-checked-in {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    }
+    .ticket-header.status-waitlisted {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    .ticket-header.status-cancelled {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    .status-badge-pill {
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border-radius: 50rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(4px);
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    .ticket-cutout-divider {
+      position: relative;
+      border-top: 2px dashed #cbd5e1;
+      margin: 1.5rem 0;
+    }
+    .ticket-cutout-divider::before,
+    .ticket-cutout-divider::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      width: 24px;
+      height: 24px;
+      background: #f0f4ff;
+      border-radius: 50%;
+    }
+    .ticket-cutout-divider::before {
+      left: -28px;
+    }
+    .ticket-cutout-divider::after {
+      right: -28px;
+    }
+    .ticket-code-pill {
+      background: #f1f5f9;
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: 0.03em;
+      word-break: break-all;
+    }
+    .info-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 0.2rem;
+      letter-spacing: 0.04em;
+    }
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Navigation Header -->
+  <div id="navbar-container"></div>
+
+  <main class="container my-auto py-4" style="max-width: 580px;">
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+      <h5 class="mt-3 fw-bold text-dark">Verifying Ticket...</h5>
+      <p class="text-muted small">Retrieving official registration details from campus registry</p>
+    </div>
+
+    <!-- Error / Invalid Ticket Card -->
+    <div id="error-card" class="d-none">
+      <div class="verification-card p-4 p-md-5 text-center">
+        <div class="text-danger mb-3" style="font-size: 3.5rem;">
+          <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <h4 class="fw-bold text-dark mb-2" id="error-title">Invalid or Unavailable Registration</h4>
+        <p class="text-muted small mb-4" id="error-message">
+          The ticket code or registration ID could not be found or has expired. Please verify with event registration desk staff.
+        </p>
+        <div class="d-grid gap-2">
+          <a href="/events.html" class="btn btn-primary rounded-pill py-2">
+            <i class="bi bi-calendar-event me-2"></i> Browse Campus Events
+          </a>
+          <a href="/index.html" class="btn btn-outline-secondary rounded-pill py-2">
+            <i class="bi bi-house me-2"></i> Home
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Valid Ticket Verification Card -->
+    <div id="ticket-card" class="d-none">
+      <div class="verification-card">
+        <!-- Status Header Banner -->
+        <div id="ticket-header" class="ticket-header status-valid">
+          <div id="header-status-badge" class="status-badge-pill">
+            <i class="bi bi-shield-check me-1"></i> Official Verified Pass
+          </div>
+          <h4 class="fw-bold mb-1" id="ticket-event-title">Event Title</h4>
+          <div class="small opacity-90" id="ticket-event-category">Category</div>
+        </div>
+
+        <div class="p-4">
+          <!-- Attendee Highlight -->
+          <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3 border">
+            <div class="user-nav-avatar bg-primary text-white d-flex align-items-center justify-content-center fw-bold rounded-circle shadow-xs" style="width: 48px; height: 48px; font-size: 1.2rem;" id="attendee-avatar">
+              S
+            </div>
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="info-label">Attendee Name</div>
+              <div class="info-value text-truncate" id="attendee-name">Student Attendee</div>
+              <div class="small text-muted text-truncate" id="attendee-meta">student@college.com</div>
+            </div>
+            <div id="live-checkin-badge">
+              <span class="badge bg-secondary p-2">Unchecked</span>
+            </div>
+          </div>
+
+          <!-- Event Schedule & Venue Grid -->
+          <div class="row g-3 mb-2">
+            <div class="col-6">
+              <div class="info-label"><i class="bi bi-calendar3 me-1 text-primary"></i> Date</div>
+              <div class="info-value" id="event-date">Date</div>
+            </div>
+            <div class="col-6">
+              <div class="info-label"><i class="bi bi-clock me-1 text-primary"></i> Time</div>
+              <div class="info-value" id="event-time">Time</div>
+            </div>
+            <div class="col-12">
+              <div class="info-label"><i class="bi bi-geo-alt me-1 text-danger"></i> Venue / Location</div>
+              <div class="info-value" id="event-venue">Campus Venue</div>
+            </div>
+            <div class="col-12">
+              <div class="info-label"><i class="bi bi-mortarboard me-1 text-info"></i> Organizer</div>
+              <div class="info-value" id="event-organizer">Event Host</div>
+            </div>
+          </div>
+
+          <!-- Cutout Divider -->
+          <div class="ticket-cutout-divider"></div>
+
+          <!-- Ticket Identifiers -->
+          <div class="mb-3">
+            <div class="info-label">Official Ticket ID</div>
+            <div class="ticket-code-pill" id="ticket-code-display">EVENT-xxx-xxx</div>
+          </div>
+
+          <!-- Check-in Status Message Box -->
+          <div id="checkin-status-box" class="p-3 rounded-3 text-center mb-3">
+            <div class="fw-bold" id="checkin-status-text">Status</div>
+            <div class="small text-muted mt-1" id="checkin-time-text"></div>
+          </div>
+
+          <!-- Organizer / Admin Check-In Action Section -->
+          <div id="organizer-action-container" class="mt-3">
+            <!-- Staff Check-in Button -->
+            <button id="btn-perform-checkin" class="btn btn-success btn-lg w-100 fw-bold rounded-3 shadow-sm py-3 d-none">
+              <i class="bi bi-check2-circle me-2"></i> Confirm Attendee Check-In
+            </button>
+            <div id="checkin-feedback-alert" class="alert d-none mt-2 text-center" role="alert"></div>
+
+            <!-- Login Prompt for Unauthenticated Staff Scanning on Mobile -->
+            <div id="staff-login-prompt" class="d-none text-center pt-2 border-top">
+              <p class="small text-muted mb-2">Are you event staff or organizer?</p>
+              <a href="#" id="staff-login-link" class="btn btn-sm btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Log in to Mark Check-In
+              </a>
+            </div>
+          </div>
+
+          <!-- Back / View Event Link -->
+          <div class="text-center mt-3 pt-2">
+            <a href="#" id="view-event-link" class="small text-decoration-none text-muted">
+              <i class="bi bi-box-arrow-up-right me-1"></i> View Full Event Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let verifiedTicket = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ticketCode = urlParams.get('ticket') || urlParams.get('id') || '';
+
+      if (!ticketCode) {
+        showError('Invalid or unavailable registration.', 'No ticket code or registration ID was provided in the URL.');
+        return;
+      }
+
+      await loadTicketDetails(ticketCode);
+    });
+
+    async function loadTicketDetails(code) {
+      const loadingState = document.getElementById('loading-state');
+      const ticketCard = document.getElementById('ticket-card');
+      const errorCard = document.getElementById('error-card');
+
+      try {
+        const res = await api.get(`/api/registrations/verify/${encodeURIComponent(code)}`);
+        if (!res.success || !res.data) {
+          showError('Invalid or unavailable registration.', 'The ticket code or registration ID could not be found or has expired.');
+          return;
+        }
+
+        verifiedTicket = res.data;
+        renderTicketUI(verifiedTicket);
+        setupStaffControls(verifiedTicket);
+
+        loadingState.classList.add('d-none');
+        errorCard.classList.add('d-none');
+        ticketCard.classList.remove('d-none');
+      } catch (err) {
+        showError('Invalid or unavailable registration.', 'The ticket code or registration ID could not be found or has expired.');
+      }
+    }
+
+    function renderTicketUI(ticket) {
+      document.getElementById('ticket-event-title').innerText = ticket.eventTitle || 'Campus Event';
+      document.getElementById('ticket-event-category').innerText = `${ticket.category || 'General Event'} • Campus Pass`;
+      
+      document.getElementById('attendee-name').innerText = ticket.studentName || 'Student';
+      document.getElementById('attendee-avatar').innerText = (ticket.studentName || 'S').charAt(0).toUpperCase();
+      
+      let studentMeta = ticket.studentEmail || '';
+      if (ticket.studentDepartment && ticket.studentDepartment !== 'N/A') {
+        studentMeta += ` • ${ticket.studentDepartment}`;
+      }
+      document.getElementById('attendee-meta').innerText = studentMeta;
+
+      document.getElementById('event-date').innerText = Utils.formatDate(ticket.startDate) || 'TBA';
+      document.getElementById('event-time').innerText = `${Utils.formatTime(ticket.startTime)} - ${Utils.formatTime(ticket.endTime)}`;
+      document.getElementById('event-venue').innerText = ticket.venueLocation ? `${ticket.venue} (${ticket.venueLocation})` : ticket.venue;
+      document.getElementById('event-organizer').innerText = ticket.organizerName || 'Event Host';
+
+      document.getElementById('ticket-code-display').innerText = ticket.ticketId;
+      document.getElementById('view-event-link').href = `/event-details.html?id=${ticket.eventId}`;
+
+      updateStatusDisplay(ticket);
+    }
+
+    function updateStatusDisplay(ticket) {
+      const header = document.getElementById('ticket-header');
+      const headerBadge = document.getElementById('header-status-badge');
+      const liveBadge = document.getElementById('live-checkin-badge');
+      const statusBox = document.getElementById('checkin-status-box');
+      const statusText = document.getElementById('checkin-status-text');
+      const timeText = document.getElementById('checkin-time-text');
+      const checkinBtn = document.getElementById('btn-perform-checkin');
+
+      if (ticket.eventStatus === 'cancelled' || ticket.eventCancelled) {
+        header.className = 'ticket-header bg-danger text-white';
+        headerBadge.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> Event Cancelled';
+        liveBadge.innerHTML = '<span class="badge bg-danger p-2"><i class="bi bi-x-circle-fill me-1"></i> Cancelled</span>';
+        
+        statusBox.className = 'p-3 rounded-3 text-center mb-3 bg-danger bg-opacity-10 border border-danger border-opacity-25';
+        statusText.className = 'fw-bold text-danger';
+        statusText.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> This event has been cancelled';
+        
+        timeText.innerText = ticket.cancellationReason
+          ? `Reason: ${ticket.cancellationReason}`
+          : 'This event was cancelled by administration or the organizer. Entry check-in is disabled.';
+        
+        if (checkinBtn) {
+          checkinBtn.classList.add('d-none');
+        }
+        return;
+      }
+
+      if (ticket.checkedIn || ticket.status === 'checked-in') {
+        header.className = 'ticket-header status-checked-in';
+        headerBadge.innerHTML = '<i class="bi bi-patch-check-fill me-1"></i> Attendance Verified';
+        liveBadge.innerHTML = '<span class="badge bg-success p-2"><i class="bi bi-check-circle-fill me-1"></i> Checked-In</span>';
+        
+        statusBox.className = 'p-3 rounded-3 text-center mb-3 bg-success bg-opacity-10 border border-success border-opacity-25';
+        statusText.className = 'fw-bold text-success';
+        statusText.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Checked-In & Admitted';
+        
+        const checkedTime = ticket.checkedInAt ? new Date(ticket.checkedInAt).toLocaleTimeString() : 'Verified';
+        timeText.innerText = `Attendance officially verified at ${checkedTime}`;
+        
+        if (checkinBtn) {
+          checkinBtn.classList.add('d-none');
+        }
+      } else if (ticket.status === 'registered') {
+        header.className = 'ticket-header status-valid';
+        headerBadge.innerHTML = '<i class="bi bi-shield-check me-1"></i> Confirmed Registration';
+        liveBadge.innerHTML = '<span class="badge bg-primary p-2">Confirmed</span>';
+        
+        statusBox.className = 'p-3 rounded-3 text-center mb-3 bg-primary bg-opacity-10 border border-primary border-opacity-25';
+        statusText.className = 'fw-bold text-primary';
+        statusText.innerHTML = '<i class="bi bi-ticket-perforated me-1"></i> Confirmed Ticket • Awaiting Door Check-In';
+        timeText.innerText = 'Valid for campus admission upon entry scan.';
+      } else if (ticket.status === 'waitlisted') {
+        header.className = 'ticket-header status-waitlisted';
+        headerBadge.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Waitlisted';
+        liveBadge.innerHTML = '<span class="badge bg-warning text-dark p-2">Waitlisted</span>';
+        
+        statusBox.className = 'p-3 rounded-3 text-center mb-3 bg-warning bg-opacity-10 border border-warning border-opacity-25';
+        statusText.className = 'fw-bold text-warning';
+        statusText.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Waitlisted Registration';
+        timeText.innerText = 'This attendee is currently on the event waitlist.';
+      } else if (ticket.status === 'cancelled') {
+        header.className = 'ticket-header status-cancelled';
+        headerBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i> Cancelled';
+        liveBadge.innerHTML = '<span class="badge bg-danger p-2">Cancelled</span>';
+        
+        statusBox.className = 'p-3 rounded-3 text-center mb-3 bg-danger bg-opacity-10 border border-danger border-opacity-25';
+        statusText.className = 'fw-bold text-danger';
+        statusText.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> Ticket Cancelled';
+        timeText.innerText = 'This registration was cancelled and is no longer valid.';
+        
+        if (checkinBtn) {
+          checkinBtn.classList.add('d-none');
+        }
+      }
+    }
+
+    function setupStaffControls(ticket) {
+      const checkinBtn = document.getElementById('btn-perform-checkin');
+      const staffPrompt = document.getElementById('staff-login-prompt');
+      const staffLoginLink = document.getElementById('staff-login-link');
+      const feedbackAlert = document.getElementById('checkin-feedback-alert');
+
+      if (!Auth.isLoggedIn()) {
+        staffPrompt.classList.remove('d-none');
+        staffLoginLink.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+        return;
+      }
+
+      const currentUser = Auth.getCurrentUser();
+      const isAdmin = currentUser.role === 'admin';
+      const isOrganizer = currentUser.role === 'organizer' && (
+        String(currentUser._id) === String(ticket.organizerId) || isAdmin
+      );
+
+      // Only show check-in button if Admin or owning Organizer AND ticket is not already checked-in or cancelled
+      if ((isAdmin || isOrganizer) && ticket.status !== 'checked-in' && ticket.status !== 'cancelled') {
+        checkinBtn.classList.remove('d-none');
+        checkinBtn.onclick = async () => {
+          checkinBtn.disabled = true;
+          checkinBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Marking Check-In...';
+          feedbackAlert.classList.add('d-none');
+
+          try {
+            const res = await api.post('/api/registrations/check-in', {
+              qrCode: ticket.ticketId,
+            });
+
+            if (res.success) {
+              feedbackAlert.className = 'alert alert-success mt-2 text-center py-2';
+              feedbackAlert.innerHTML = `<i class="bi bi-check2-circle me-1"></i> ${res.message || 'Check-in verified successfully!'}`;
+              feedbackAlert.classList.remove('d-none');
+
+              ticket.status = 'checked-in';
+              ticket.checkedIn = true;
+              ticket.checkedInAt = new Date().toISOString();
+              updateStatusDisplay(ticket);
+              Utils.showToast('Check-in confirmed!', 'success');
+            }
+          } catch (err) {
+            checkinBtn.disabled = false;
+            checkinBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i> Confirm Attendee Check-In';
+            feedbackAlert.className = 'alert alert-danger mt-2 text-center py-2';
+            feedbackAlert.innerText = err.message || 'Unable to check in attendee.';
+            feedbackAlert.classList.remove('d-none');
+          }
+        };
+      } else if (currentUser.role === 'student') {
+        // Students cannot self-check-in
+        checkinBtn.classList.add('d-none');
+        staffPrompt.classList.add('d-none');
+      }
+    }
+
+    function showError(title, message) {
+      document.getElementById('loading-state').classList.add('d-none');
+      document.getElementById('ticket-card').classList.add('d-none');
+      
+      const errorCard = document.getElementById('error-card');
+      document.getElementById('error-title').innerText = title;
+      document.getElementById('error-message').innerText = message;
+      errorCard.classList.remove('d-none');
+    }
+  </script>
+</body>
+</html>

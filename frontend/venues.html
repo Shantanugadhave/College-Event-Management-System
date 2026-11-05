@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Venues & Facilities | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-container"></div>
+
+  <!-- Header -->
+  <section class="py-4 bg-white border-bottom">
+    <div class="container-xl">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <h2 class="fw-bold text-dark mb-1">Campus Venues & Reservation Schedule</h2>
+          <p class="text-muted small mb-0">Auditoriums, seminar concourses, open amphitheaters, and indoor athletic facilities.</p>
+        </div>
+        <div id="admin-add-venue-btn-wrapper" class="d-none">
+          <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#venueModal" onclick="openAddVenueModal()">
+            <i class="bi bi-building-add me-1"></i> Add New Venue
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Venues Grid -->
+  <div class="container-xl py-5">
+    <div class="row g-4" id="venues-grid-container">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Loading campus venues...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Venue Details & Bookings Modal -->
+  <div class="modal fade" id="venueBookingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom pb-3">
+          <div>
+            <h5 class="modal-title fw-bold text-dark mb-0" id="vb-modal-title">Venue Details</h5>
+            <div class="small text-muted" id="vb-modal-location">Location</div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-4">
+            <div class="col-sm-4">
+              <div class="p-3 bg-light rounded-3">
+                <div class="small text-muted">Max Capacity</div>
+                <div class="fw-bold fs-5 text-dark" id="vb-modal-capacity">--</div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-3 bg-light rounded-3">
+                <div class="small text-muted">Current Availability</div>
+                <div class="fw-bold fs-5 text-success" id="vb-modal-avail">Available</div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-3 bg-light rounded-3">
+                <div class="small text-muted">Operating Status</div>
+                <div class="fw-bold fs-5 text-primary" id="vb-modal-status">Active</div>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-dark mb-2">Amenities & Infrastructure</h6>
+          <div id="vb-modal-amenities" class="d-flex flex-wrap gap-2 mb-4"></div>
+
+          <h6 class="fw-bold text-dark mb-2">Upcoming Scheduled Bookings</h6>
+          <div class="table-responsive border rounded-3 bg-white">
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Event</th>
+                  <th>Date</th>
+                  <th>Time Slot</th>
+                  <th>Host</th>
+                </tr>
+              </thead>
+              <tbody id="vb-modal-bookings-tbody">
+                <tr><td colspan="4" class="text-center py-2 text-muted">No upcoming bookings.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Venue Modal (Admin) -->
+  <div class="modal fade" id="venueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom pb-3">
+          <h5 class="modal-title fw-bold" id="venueModalLabel">Add Campus Venue</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="venue-form-alert" class="alert alert-danger d-none" role="alert"></div>
+
+          <form id="venue-form">
+            <input type="hidden" id="venue-edit-id" value="">
+
+            <div class="mb-3">
+              <label for="venue-name-input" class="form-label small fw-semibold">Venue Name <span class="text-danger">*</span></label>
+              <input type="text" id="venue-name-input" class="form-control" placeholder="e.g. Science & Technology Concourse" required minlength="2">
+            </div>
+
+            <div class="mb-3">
+              <label for="venue-location-input" class="form-label small fw-semibold">Campus Location <span class="text-danger">*</span></label>
+              <input type="text" id="venue-location-input" class="form-control" placeholder="Building B, 2nd Floor, North Quad" required>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label for="venue-capacity-input" class="form-label small fw-semibold">Capacity <span class="text-danger">*</span></label>
+                <input type="number" id="venue-capacity-input" class="form-control" placeholder="500" min="1" required>
+              </div>
+              <div class="col-6">
+                <label for="venue-status-input" class="form-label small fw-semibold">Status</label>
+                <select id="venue-status-input" class="form-select">
+                  <option value="active">Active</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="venue-amenities-input" class="form-label small fw-semibold">Amenities (Comma separated)</label>
+              <input type="text" id="venue-amenities-input" class="form-control" placeholder="4K Projector, Stage Lighting, Dolby Audio, High-Speed WiFi">
+            </div>
+
+            <div class="mb-3">
+              <label for="venue-image-input" class="form-label small fw-semibold">Banner Image URL</label>
+              <input type="url" id="venue-image-input" class="form-control" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="mb-4">
+              <label for="venue-desc-input" class="form-label small fw-semibold">Description</label>
+              <textarea id="venue-desc-input" class="form-control" rows="3" placeholder="Facilities, accessibility info, sound specifications..."></textarea>
+            </div>
+
+            <button type="submit" id="save-venue-btn" class="btn btn-primary w-100 py-2 rounded-3 fw-bold">
+              Save Venue
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let allVenues = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (Auth.isLoggedIn() && Auth.getCurrentUser().role === 'admin') {
+        document.getElementById('admin-add-venue-btn-wrapper').classList.remove('d-none');
+      }
+
+      await loadVenues();
+
+      // Form submit
+      document.getElementById('venue-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const alertBox = document.getElementById('venue-form-alert');
+        alertBox.classList.add('d-none');
+
+        const saveBtn = document.getElementById('save-venue-btn');
+        saveBtn.disabled = true;
+
+        const editId = document.getElementById('venue-edit-id').value;
+        const name = document.getElementById('venue-name-input').value.trim();
+        const location = document.getElementById('venue-location-input').value.trim();
+        const capacity = Number(document.getElementById('venue-capacity-input').value);
+        const status = document.getElementById('venue-status-input').value;
+        const amenities = document.getElementById('venue-amenities-input').value.split(',').map(s => s.trim()).filter(Boolean);
+        const image = document.getElementById('venue-image-input').value.trim();
+        const description = document.getElementById('venue-desc-input').value.trim();
+
+        const payload = {
+          name,
+          location,
+          capacity,
+          status,
+          amenities,
+          images: image ? [image] : [],
+          description,
+        };
+
+        try {
+          if (editId) {
+            await api.put(`/api/venues/${editId}`, payload);
+            Utils.showToast('Venue updated successfully!', 'success');
+          } else {
+            await api.post('/api/venues', payload);
+            Utils.showToast('New venue created successfully!', 'success');
+          }
+
+          const modalEl = document.getElementById('venueModal');
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+          await loadVenues();
+        } catch (err) {
+          alertBox.innerText = err.message;
+          alertBox.classList.remove('d-none');
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    });
+
+    async function loadVenues() {
+      const container = document.getElementById('venues-grid-container');
+      try {
+        const res = await api.get('/api/venues');
+        if (!res.success || !res.data) {
+          container.innerHTML = '<div class="col-12 alert alert-danger">Failed to load venues.</div>';
+          return;
+        }
+
+        allVenues = res.data;
+        const isAdmin = Auth.isLoggedIn() && Auth.getCurrentUser().role === 'admin';
+
+        if (allVenues.length === 0) {
+          container.innerHTML = `
+            <div class="col-12 text-center py-5">
+              <div class="empty-state-icon"><i class="bi bi-building-x"></i></div>
+              <h5 class="fw-bold">No Venues Found</h5>
+              <p class="text-muted">No campus venues have been added yet.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = allVenues.map(v => {
+          const banner = (v.images && v.images.length > 0) ? v.images[0] : 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80';
+          const isArchived = v.status === 'archived';
+
+          return `
+            <div class="col-lg-4 col-md-6">
+              <div class="card border rounded-4 shadow-sm bg-white overflow-hidden h-100 d-flex flex-column">
+                <div style="height: 180px; overflow: hidden; position: relative;">
+                  <img src="${banner}" alt="${Utils.escapeHtml(v.name)}" class="w-100 h-100 object-fit-cover" onerror="this.src='https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80'">
+                  <span class="position-absolute top-0 end-0 m-3 badge ${v.status === 'active' ? 'bg-success' : 'bg-warning text-dark'}">
+                    ${v.status.toUpperCase()}
+                  </span>
+                </div>
+                <div class="p-4 d-flex flex-column flex-grow-1">
+                  <h5 class="fw-bold text-dark mb-1">${Utils.escapeHtml(v.name)}</h5>
+                  <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i>${Utils.escapeHtml(v.location)}</p>
+
+                  <div class="p-2 bg-light rounded-3 d-flex justify-content-between align-items-center mb-3">
+                    <span class="small text-muted fw-semibold">Maximum Capacity:</span>
+                    <span class="fw-bold text-dark">${v.capacity} persons</span>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-1 mb-3">
+                    ${(v.amenities || []).slice(0, 3).map(a => `<span class="badge bg-light text-dark border small">${Utils.escapeHtml(a)}</span>`).join('')}
+                    ${(v.amenities || []).length > 3 ? `<span class="badge bg-light text-muted small">+${v.amenities.length - 3} more</span>` : ''}
+                  </div>
+
+                  <div class="mt-auto pt-3 border-top d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary rounded-pill flex-grow-1" onclick="viewVenueDetails('${v._id}')">
+                      <i class="bi bi-calendar-range me-1"></i> Bookings & Info
+                    </button>
+                    ${isAdmin ? `
+                      <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="openEditVenueModal('${v._id}')" title="Edit Venue">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="archiveVenue('${v._id}', '${Utils.escapeHtml(v.name)}')" title="Archive">
+                        <i class="bi bi-archive"></i>
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="col-12 alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    async function viewVenueDetails(id) {
+      try {
+        const res = await api.get(`/api/venues/${id}`);
+        if (res.success && res.data) {
+          const v = res.data;
+          document.getElementById('vb-modal-title').innerText = v.name;
+          document.getElementById('vb-modal-location').innerText = v.location;
+          document.getElementById('vb-modal-capacity').innerText = `${v.capacity} seats`;
+          document.getElementById('vb-modal-avail').innerText = v.availability || 'Available';
+          document.getElementById('vb-modal-status').innerText = v.status || 'Active';
+
+          const amenitiesDiv = document.getElementById('vb-modal-amenities');
+          amenitiesDiv.innerHTML = (v.amenities || []).map(a => `
+            <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-check2 text-success me-1"></i>${Utils.escapeHtml(a)}</span>
+          `).join('') || '<span class="text-muted small">None listed</span>';
+
+          const bookingsTbody = document.getElementById('vb-modal-bookings-tbody');
+          const bookings = v.currentBookings || [];
+
+          if (bookings.length === 0) {
+            bookingsTbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No conflicting active bookings scheduled.</td></tr>';
+          } else {
+            bookingsTbody.innerHTML = bookings.map(b => `
+              <tr>
+                <td class="fw-bold small">${Utils.escapeHtml(b.title)}</td>
+                <td class="small">${Utils.formatDate(b.startDate, { shortMonth: true })}</td>
+                <td class="small">${Utils.formatTime(b.startTime)} - ${Utils.formatTime(b.endTime)}</td>
+                <td class="small text-muted">${Utils.escapeHtml(b.organizer?.name || 'Club')}</td>
+              </tr>
+            `).join('');
+          }
+
+          const modal = new bootstrap.Modal(document.getElementById('venueBookingsModal'));
+          modal.show();
+        }
+      } catch (err) {
+        Utils.showToast(err.message, 'error');
+      }
+    }
+
+    function openAddVenueModal() {
+      document.getElementById('venueModalLabel').innerText = 'Add Campus Venue';
+      document.getElementById('venue-edit-id').value = '';
+      document.getElementById('venue-form').reset();
+    }
+
+    function openEditVenueModal(id) {
+      const v = allVenues.find(item => item._id === id);
+      if (!v) return;
+
+      document.getElementById('venueModalLabel').innerText = 'Edit Campus Venue';
+      document.getElementById('venue-edit-id').value = v._id;
+      document.getElementById('venue-name-input').value = v.name;
+      document.getElementById('venue-location-input').value = v.location;
+      document.getElementById('venue-capacity-input').value = v.capacity;
+      document.getElementById('venue-status-input').value = v.status;
+      document.getElementById('venue-amenities-input').value = (v.amenities || []).join(', ');
+      document.getElementById('venue-image-input').value = (v.images && v.images[0]) || '';
+      document.getElementById('venue-desc-input').value = v.description || '';
+
+      const modal = new bootstrap.Modal(document.getElementById('venueModal'));
+      modal.show();
+    }
+
+    async function archiveVenue(id, name) {
+      if (!confirm(`Are you sure you want to archive "${name}"? Active events at this venue cannot be in progress.`)) return;
+      try {
+        const res = await api.delete(`/api/venues/${id}`);
+        if (res.success) {
+          Utils.showToast(res.message, 'info');
+          await loadVenues();
+        }
+      } catch (err) {
+        Utils.showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

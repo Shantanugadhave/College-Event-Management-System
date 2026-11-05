@@ -1,0 +1,39 @@
+{
+  "name": "college-event-management",
+  "version": "1.0.0",
+  "description": "Production-ready College Event Management System full-stack web application",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "seed": "node backend/seeds/seed.js",
+    "test": "node backend/test-crud.js"
+  },
+  "keywords": [
+    "college",
+    "event-management",
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "bootstrap5"
+  ],
+  "author": "Google DeepMind Antigravity Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.1.3"
+  }
+}

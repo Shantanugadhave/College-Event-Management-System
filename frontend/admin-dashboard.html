@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Command Console | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <div class="dashboard-layout">
+    <!-- Admin Sidebar -->
+    <div class="dashboard-sidebar">
+      <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+        <div class="user-nav-avatar bg-danger text-white d-flex align-items-center justify-content-center fw-bold fs-5">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <div>
+          <h6 class="fw-bold text-dark mb-0">System Admin</h6>
+          <span class="badge bg-danger small">Full Access</span>
+        </div>
+      </div>
+
+      <div class="sidebar-heading">Administration</div>
+      <a href="/admin-dashboard.html" class="sidebar-nav-item active">
+        <i class="bi bi-speedometer2"></i> System Overview
+      </a>
+      <a href="/events.html" class="sidebar-nav-item">
+        <i class="bi bi-calendar-check"></i> All Campus Events
+      </a>
+      <a href="/venues.html" class="sidebar-nav-item">
+        <i class="bi bi-building"></i> Venues Inventory
+      </a>
+      <a href="/reports.html" class="sidebar-nav-item">
+        <i class="bi bi-bar-chart-line"></i> Analytics & Reports
+      </a>
+      <a href="/feedback.html" class="sidebar-nav-item">
+        <i class="bi bi-lightbulb"></i> Platform Ideas & Bugs
+      </a>
+      <a href="/notifications.html" class="sidebar-nav-item">
+        <i class="bi bi-bell"></i> Alerts & Broadcasts
+      </a>
+
+      <div class="mt-auto pt-3 border-top">
+        <a href="javascript:void(0)" onclick="Auth.logout()" class="sidebar-nav-item text-danger">
+          <i class="bi bi-box-arrow-right"></i> Sign Out
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+      <!-- Top Bar -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold text-dark mb-1">Administrative Console</h2>
+          <p class="text-muted small mb-0">System-wide monitoring, event approval queues, organizer verifications, and user governance.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/venues.html" class="btn btn-outline-primary rounded-pill px-3">
+            <i class="bi bi-building-add me-1"></i> Venues
+          </a>
+          <a href="/reports.html" class="btn btn-primary rounded-pill px-3">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Reports
+          </a>
+        </div>
+      </div>
+
+      <!-- Metrics Grid (11 Required Metrics) -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Users</div>
+              <div class="stat-value text-dark" id="stat-total-users">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-primary"><i class="bi bi-people-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Students</div>
+              <div class="stat-value text-info" id="stat-total-students">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-info"><i class="bi bi-mortarboard-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Organizers</div>
+              <div class="stat-value text-success" id="stat-total-organizers">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-success"><i class="bi bi-megaphone-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Venues</div>
+              <div class="stat-value text-purple" id="stat-total-venues">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-purple"><i class="bi bi-building"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Events</div>
+              <div class="stat-value text-dark" id="stat-total-events">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-primary"><i class="bi bi-calendar3"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Active / Live Events</div>
+              <div class="stat-value text-success" id="stat-active-events">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-success"><i class="bi bi-check-circle-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Pending Approval</div>
+              <div class="stat-value text-warning" id="stat-pending-events">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-warning"><i class="bi bi-hourglass-split"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Cancelled / Archived</div>
+              <div class="stat-value text-danger" id="stat-cancelled-events">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-warning"><i class="bi bi-x-octagon-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Registrations</div>
+              <div class="stat-value text-primary" id="stat-total-regs">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-primary"><i class="bi bi-ticket-detailed-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Attendance Rate</div>
+              <div class="stat-value text-success" id="stat-attendance-rate">0%</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-success"><i class="bi bi-person-check-fill"></i></div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Average Event Rating</div>
+              <div class="stat-value text-warning" id="stat-avg-rating">0.0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-warning"><i class="bi bi-star-fill"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h5 class="fw-bold text-dark mb-0">Events Distribution by Category</h5>
+              <span class="badge bg-light text-muted border">Live Data</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h5 class="fw-bold text-dark mb-0">Monthly Registration Trend</h5>
+              <span class="badge bg-light text-muted border">6 Months</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+              <canvas id="monthlyRegistrationsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Pending Events Approval Queue -->
+      <div class="custom-table-card mb-4">
+        <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-warning bg-opacity-10">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
+            <h5 class="fw-bold text-dark mb-0">Pending Events Approval Queue</h5>
+          </div>
+          <span class="badge bg-warning text-dark fw-bold" id="pending-events-count">0 Awaiting Review</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table custom-table mb-0">
+            <thead>
+              <tr>
+                <th>Event Title</th>
+                <th>Category</th>
+                <th>Organizer</th>
+                <th>Date & Time</th>
+                <th>Venue & Cap</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody id="pending-events-tbody">
+              <tr>
+                <td colspan="6" class="text-center py-3 text-muted">Checking pending events...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section: Organizer Verification Queue -->
+      <div class="custom-table-card mb-4">
+        <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-check text-primary fs-5"></i>
+            <h5 class="fw-bold text-dark mb-0">Organizer Verification Management</h5>
+          </div>
+          <span class="badge bg-primary" id="unverified-orgs-count">0 Unverified</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table custom-table mb-0">
+            <thead>
+              <tr>
+                <th>Organizer Name</th>
+                <th>Email</th>
+                <th>Registration Ref Number</th>
+                <th>Current Status</th>
+                <th class="text-end">Verification Action</th>
+              </tr>
+            </thead>
+            <tbody id="organizers-tbody">
+              <tr>
+                <td colspan="5" class="text-center py-3 text-muted">Loading organizers...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section: User Account Management -->
+      <div class="custom-table-card">
+        <div class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+          <h5 class="fw-bold text-dark mb-0">User Account Governance</h5>
+          <div class="d-flex gap-2">
+            <input type="text" id="user-search-input" class="form-control form-control-sm" placeholder="Search users by name or email..." style="max-width: 250px;">
+            <select id="user-role-filter" class="form-select form-select-sm" style="max-width: 140px;">
+              <option value="">All Roles</option>
+              <option value="student">Students</option>
+              <option value="organizer">Organizers</option>
+              <option value="admin">Admins</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table custom-table mb-0">
+            <thead>
+              <tr>
+                <th>User Details</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Account Status</th>
+                <th>Joined Date</th>
+                <th class="text-end">Deactivation Action</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">Loading users list...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let categoryChartInstance = null;
+    let monthlyChartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireAuth(['admin'])) return;
+
+      await loadAdminOverview();
+      await loadPendingEvents();
+      await loadOrganizers();
+      await loadUsers();
+
+      // Search & Role filters
+      document.getElementById('user-search-input').addEventListener('input', Utils.debounce(() => {
+        loadUsers();
+      }, 350));
+
+      document.getElementById('user-role-filter').addEventListener('change', () => {
+        loadUsers();
+      });
+    });
+
+    async function loadAdminOverview() {
+      try {
+        const res = await api.get('/api/reports/admin-overview');
+        if (res.success && res.data) {
+          const { stats, categoryStats, monthlyRegistrations } = res.data;
+
+          document.getElementById('stat-total-users').innerText = stats.totalUsers || 0;
+          document.getElementById('stat-total-students').innerText = stats.totalStudents || 0;
+          document.getElementById('stat-total-organizers').innerText = stats.totalOrganizers || 0;
+          document.getElementById('stat-total-venues').innerText = stats.totalVenues || 0;
+          document.getElementById('stat-total-events').innerText = stats.totalEvents || 0;
+          document.getElementById('stat-active-events').innerText = stats.activeEvents || 0;
+          document.getElementById('stat-pending-events').innerText = stats.pendingEvents || 0;
+          document.getElementById('stat-cancelled-events').innerText = stats.cancelledEvents || 0;
+          document.getElementById('stat-total-regs').innerText = stats.totalRegistrations || 0;
+          document.getElementById('stat-attendance-rate').innerText = `${stats.attendanceRate || 0}%`;
+          document.getElementById('stat-avg-rating').innerText = Number(stats.averageRating || 0).toFixed(1);
+
+          renderCategoryChart(categoryStats);
+          renderMonthlyChart(monthlyRegistrations);
+        }
+      } catch (err) {
+        console.warn('Admin overview load error:', err.message);
+      }
+    }
+
+    function renderCategoryChart(data) {
+      const ctx = document.getElementById('categoryChart');
+      if (!ctx) return;
+      if (categoryChartInstance) categoryChartInstance.destroy();
+
+      const labels = (data || []).map(d => d._id || 'Unassigned');
+      const counts = (data || []).map(d => d.count || 0);
+
+      categoryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.length > 0 ? labels : ['No Data'],
+          datasets: [{
+            data: counts.length > 0 ? counts : [1],
+            backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'],
+            borderWidth: 2,
+            borderColor: '#ffffff',
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right' },
+          },
+        },
+      });
+    }
+
+    function renderMonthlyChart(data) {
+      const ctx = document.getElementById('monthlyRegistrationsChart');
+      if (!ctx) return;
+      if (monthlyChartInstance) monthlyChartInstance.destroy();
+
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const labels = (data || []).map(d => `${monthNames[d._id?.month || 1]} ${d._id?.year || ''}`);
+      const counts = (data || []).map(d => d.count || 0);
+
+      monthlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length > 0 ? labels : ['Current Period'],
+          datasets: [{
+            label: 'Registrations',
+            data: counts.length > 0 ? counts : [0],
+            backgroundColor: 'rgba(99, 102, 241, 0.8)',
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } },
+          },
+        },
+      });
+    }
+
+    async function loadPendingEvents() {
+      const tbody = document.getElementById('pending-events-tbody');
+      try {
+        const res = await api.get('/api/events', { status: 'pending' });
+        if (res.success && res.data) {
+          const events = res.data.events || [];
+          document.getElementById('pending-events-count').innerText = `${events.length} Awaiting Review`;
+
+          if (events.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><i class="bi bi-check2-all text-success me-1"></i>No pending events! All proposals reviewed.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = events.map(e => `
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">
+                  <a href="/event-details.html?id=${e._id}" class="text-dark text-decoration-none">${Utils.escapeHtml(e.title)}</a>
+                </div>
+              </td>
+              <td>${Utils.getCategoryBadge(e.category)}</td>
+              <td>
+                <div class="small fw-semibold text-dark">${Utils.escapeHtml(e.organizer?.name || 'Club')}</div>
+                <div class="text-muted" style="font-size:0.75rem;">${e.organizer?.email || ''}</div>
+              </td>
+              <td>
+                <div class="small text-dark">${Utils.formatDate(e.startDate, { shortMonth: true })}</div>
+                <div class="text-muted" style="font-size:0.75rem;">${Utils.formatTime(e.startTime)}</div>
+              </td>
+              <td>
+                <div class="small text-dark">${Utils.escapeHtml(e.venue?.name || 'Venue')}</div>
+                <div class="text-muted" style="font-size:0.75rem;">Capacity: ${e.capacity}</div>
+              </td>
+              <td class="text-end">
+                <div class="d-flex justify-content-end gap-1">
+                  <button class="btn btn-sm btn-success px-3 fw-bold" onclick="approveEvent('${e._id}')">
+                    <i class="bi bi-check-lg me-1"></i> Approve
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="rejectEvent('${e._id}')">
+                    <i class="bi bi-x-lg me-1"></i> Reject
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">${err.message}</td></tr>`;
+      }
+    }
+
+    async function approveEvent(id) {
+      try {
+        const res = await api.put(`/api/events/${id}/status`, { status: 'approved' });
+        if (res.success) {
+          Utils.showToast('Event approved and made live!', 'success');
+          await loadAdminOverview();
+          await loadPendingEvents();
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+
+    async function rejectEvent(id) {
+      const reason = prompt('Specify rejection reason for the organizer:');
+      if (reason === null) return;
+      try {
+        const res = await api.put(`/api/events/${id}/status`, { status: 'rejected', rejectionReason: reason });
+        if (res.success) {
+          Utils.showToast('Event marked as rejected', 'warning');
+          await loadAdminOverview();
+          await loadPendingEvents();
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+
+    async function loadOrganizers() {
+      const tbody = document.getElementById('organizers-tbody');
+      try {
+        const res = await api.get('/api/users', { role: 'organizer' });
+        if (res.success && res.data) {
+          const orgs = res.data.users || [];
+          const unverified = orgs.filter(o => !o.isVerified);
+          document.getElementById('unverified-orgs-count').innerText = `${unverified.length} Unverified`;
+
+          if (orgs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No organizer accounts registered.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = orgs.map(o => `
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">${Utils.escapeHtml(o.name)}</div>
+              </td>
+              <td><span class="small text-muted">${o.email}</span></td>
+              <td>
+                <span class="badge bg-light text-dark border fw-mono">${Utils.escapeHtml(o.organizationNumber || 'Not Provided')}</span>
+              </td>
+              <td>
+                ${o.isVerified ? `
+                  <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>
+                ` : `
+                  <span class="badge bg-warning bg-opacity-10 text-warning"><i class="bi bi-clock-history me-1"></i>Pending</span>
+                `}
+              </td>
+              <td class="text-end">
+                ${o.isVerified ? `
+                  <button class="btn btn-sm btn-outline-secondary" onclick="toggleVerification('${o._id}', false)">
+                    Revoke Verification
+                  </button>
+                ` : `
+                  <button class="btn btn-sm btn-primary fw-bold" onclick="toggleVerification('${o._id}', true)">
+                    <i class="bi bi-patch-check me-1"></i> Verify Organizer
+                  </button>
+                `}
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">${err.message}</td></tr>`;
+      }
+    }
+
+    async function toggleVerification(userId, isVerified) {
+      try {
+        const res = await api.put(`/api/users/${userId}/verify`, { isVerified });
+        if (res.success) {
+          Utils.showToast(res.message, 'success');
+          await loadOrganizers();
+          await loadAdminOverview();
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('users-tbody');
+      const search = document.getElementById('user-search-input').value.trim();
+      const role = document.getElementById('user-role-filter').value;
+
+      try {
+        const res = await api.get('/api/users', { search, role, limit: 30 });
+        if (res.success && res.data) {
+          const users = res.data.users || [];
+
+          if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No users found.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = users.map(u => {
+            const roleBadge = u.role === 'admin' ? 'bg-danger' : u.role === 'organizer' ? 'bg-primary' : 'bg-success';
+
+            return `
+              <tr>
+                <td>
+                  <div class="fw-bold text-dark">${Utils.escapeHtml(u.name)}</div>
+                  <div class="text-muted" style="font-size:0.75rem;">${u.email}</div>
+                </td>
+                <td><span class="badge ${roleBadge} text-white small">${u.role}</span></td>
+                <td><span class="small">${u.phone || 'N/A'}</span></td>
+                <td>
+                  ${u.isActive ? `
+                    <span class="badge bg-success bg-opacity-10 text-success">Active</span>
+                  ` : `
+                    <span class="badge bg-danger bg-opacity-10 text-danger">Deactivated</span>
+                  `}
+                </td>
+                <td><span class="small text-muted">${Utils.formatDate(u.createdAt, { shortMonth: true })}</span></td>
+                <td class="text-end">
+                  ${u.role !== 'admin' ? `
+                    <button class="btn btn-sm ${u.isActive ? 'btn-outline-danger' : 'btn-outline-success'} rounded-pill px-3" onclick="toggleUserActive('${u._id}')">
+                      ${u.isActive ? 'Deactivate' : 'Reactivate'}
+                    </button>
+                  ` : `
+                    <span class="text-muted small">Protected Admin</span>
+                  `}
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">${err.message}</td></tr>`;
+      }
+    }
+
+    async function toggleUserActive(userId) {
+      if (!confirm('Are you sure you want to change this account active state?')) return;
+      try {
+        const res = await api.delete(`/api/users/${userId}`);
+        if (res.success) {
+          Utils.showToast(res.message, 'info');
+          await loadUsers();
+          await loadAdminOverview();
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

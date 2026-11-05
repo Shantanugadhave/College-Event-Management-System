@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Analytical Intelligence | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-light">
+
+  <div id="navbar-container"></div>
+
+  <div class="container-xl py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <h2 class="fw-bold text-dark mb-1">Campus Analytics & System Reports</h2>
+        <p class="text-muted small mb-0">Quantitative attendance rates, no-show ratios, category performance, and CSV exports.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary rounded-pill px-3" onclick="window.print()">
+          <i class="bi bi-printer me-1"></i> Print Summary
+        </button>
+        <button id="export-events-csv" class="btn btn-outline-primary rounded-pill px-3">
+          <i class="bi bi-download me-1"></i> Events CSV
+        </button>
+        <button id="export-attendees-csv" class="btn btn-primary rounded-pill px-3">
+          <i class="bi bi-file-earmark-arrow-down me-1"></i> Attendees CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Analytics Metrics Overview -->
+    <div class="row g-3 mb-4" id="report-stats-cards">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Active Events</div>
+            <div class="stat-value text-primary" id="rep-active-events">--</div>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-primary"><i class="bi bi-calendar3"></i></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Total Registrations</div>
+            <div class="stat-value text-success" id="rep-total-regs">--</div>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-success"><i class="bi bi-ticket-perforated"></i></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Overall Attendance Rate</div>
+            <div class="stat-value text-dark" id="rep-attendance-rate">--%</div>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-info"><i class="bi bi-person-check-fill"></i></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Average Satisfaction</div>
+            <div class="stat-value text-warning" id="rep-avg-rating">--</div>
+          </div>
+          <div class="stat-icon-wrapper stat-icon-warning"><i class="bi bi-star-fill"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h5 class="fw-bold text-dark mb-0">Event Categories Share</h5>
+            <span class="badge bg-light text-muted border">Category Breakdown</span>
+          </div>
+          <div style="height: 300px; position: relative;">
+            <canvas id="reportCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h5 class="fw-bold text-dark mb-0">Venue Utilization Ranking</h5>
+            <span class="badge bg-light text-muted border">Top Booked Venues</span>
+          </div>
+          <div style="height: 300px; position: relative;">
+            <canvas id="reportVenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Analytics Table -->
+    <div class="custom-table-card">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold text-dark mb-0">Campus Events Performance Breakdown</h5>
+        <span class="badge bg-light text-dark border">Consolidated Data</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table custom-table mb-0">
+          <thead>
+            <tr>
+              <th>Event Title</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th>Venue</th>
+              <th>Capacity</th>
+              <th>Registered</th>
+              <th>Attended</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted">Compiling data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let categoryChart = null;
+    let venueChart = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireAuth(['organizer', 'admin'])) return;
+
+      await loadReportMetrics();
+      await loadEventsTable();
+
+      document.getElementById('export-events-csv').addEventListener('click', () => {
+        window.location.href = '/api/reports/export-csv?type=events';
+      });
+
+      document.getElementById('export-attendees-csv').addEventListener('click', () => {
+        window.location.href = '/api/reports/export-csv?type=attendees';
+      });
+    });
+
+    async function loadReportMetrics() {
+      try {
+        const user = Auth.getCurrentUser();
+        const endpoint = user.role === 'admin' ? '/api/reports/admin-overview' : '/api/reports/organizer-overview';
+        const res = await api.get(endpoint);
+
+        if (res.success && res.data) {
+          const d = res.data;
+          const stats = d.stats || d;
+
+          document.getElementById('rep-active-events').innerText = stats.activeEvents || stats.totalEvents || 0;
+          document.getElementById('rep-total-regs').innerText = stats.totalRegistrations || 0;
+          document.getElementById('rep-attendance-rate').innerText = `${stats.attendanceRate || 0}%`;
+          document.getElementById('rep-avg-rating').innerText = Number(stats.averageRating || 0).toFixed(1);
+
+          if (d.categoryStats) {
+            renderCategoryChart(d.categoryStats);
+          }
+          if (d.venueUsage) {
+            renderVenueChart(d.venueUsage);
+          }
+        }
+      } catch (err) {
+        console.warn('Metrics error:', err.message);
+      }
+    }
+
+    function renderCategoryChart(data) {
+      const ctx = document.getElementById('reportCategoryChart');
+      if (!ctx) return;
+      if (categoryChart) categoryChart.destroy();
+
+      const labels = data.map(i => i._id || 'Unknown');
+      const counts = data.map(i => i.count || 0);
+
+      categoryChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [{
+            data: counts,
+            backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'],
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        },
+      });
+    }
+
+    function renderVenueChart(data) {
+      const ctx = document.getElementById('reportVenueChart');
+      if (!ctx) return;
+      if (venueChart) venueChart.destroy();
+
+      const labels = (data || []).map(v => v.venueName || 'Venue');
+      const counts = (data || []).map(v => v.eventCount || 0);
+
+      venueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length > 0 ? labels : ['No Venues Booked'],
+          datasets: [{
+            label: 'Hosted Events',
+            data: counts.length > 0 ? counts : [0],
+            backgroundColor: '#0ea5e9',
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } },
+          },
+        },
+      });
+    }
+
+    async function loadEventsTable() {
+      const tbody = document.getElementById('report-table-body');
+      try {
+        const res = await api.get('/api/events', { status: 'all', limit: 50 });
+        if (res.success && res.data) {
+          const events = res.data.events || [];
+
+          if (events.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No events recorded.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = events.map(e => `
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">
+                  <a href="/event-details.html?id=${e._id}" class="text-dark text-decoration-none">${Utils.escapeHtml(e.title)}</a>
+                </div>
+              </td>
+              <td>${Utils.getCategoryBadge(e.category)}</td>
+              <td><span class="small">${Utils.formatDate(e.startDate, { shortMonth: true })}</span></td>
+              <td><span class="small">${Utils.escapeHtml(e.venue?.name || 'Venue')}</span></td>
+              <td>${e.capacity}</td>
+              <td class="fw-semibold text-primary">${e.registeredCount || 0}</td>
+              <td class="fw-semibold text-success">${e.attendedCount || 0}</td>
+              <td>${Utils.getStatusBadge(e.status)}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-danger text-center">${err.message}</td></tr>`;
+      }
+    }
+  </script>
+</body>
+</html>

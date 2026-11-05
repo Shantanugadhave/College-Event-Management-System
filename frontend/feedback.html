@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback & Platform Suggestions | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-container"></div>
+
+  <div class="container-xl py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <h2 class="fw-bold text-dark mb-1">Feedback, Reviews & Platform Ideas</h2>
+        <p class="text-muted small mb-0">Review campus events, inspect attendee satisfaction, or suggest improvements to the system.</p>
+      </div>
+      <div>
+        <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#suggestionModal">
+          <i class="bi bi-lightbulb me-1"></i> Submit Platform Idea / Bug
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <ul class="nav nav-pills bg-white p-2 rounded-4 shadow-sm border mb-4" id="main-feedback-tabs">
+      <li class="nav-item">
+        <button class="nav-link active rounded-3 fw-bold" id="tab-events-feedback" data-bs-toggle="pill" data-bs-target="#content-events-feedback">
+          <i class="bi bi-star-half me-1"></i> Event Reviews & Ratings
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link rounded-3 fw-bold" id="tab-platform-suggestions" data-bs-toggle="pill" data-bs-target="#content-platform-suggestions">
+          <i class="bi bi-lightbulb me-1"></i> Platform Improvement Tracker
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Event Feedback Tab -->
+      <div class="tab-pane fade show active" id="content-events-feedback">
+        <div class="card border rounded-4 shadow-sm bg-white p-4">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-2 border-bottom">
+            <h5 class="fw-bold text-dark mb-0">Recent Attendee Event Reviews</h5>
+            <div class="d-flex gap-2">
+              <select id="sentiment-filter" class="form-select form-select-sm" style="width: auto;">
+                <option value="">All Sentiments</option>
+                <option value="Positive">Positive Reviews</option>
+                <option value="Neutral">Neutral Reviews</option>
+                <option value="Constructive">Constructive Reviews</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="event-feedbacks-container" class="d-flex flex-column gap-3">
+            <div class="text-center py-4 text-muted">Loading reviews...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform Suggestions Tab -->
+      <div class="tab-pane fade" id="content-platform-suggestions">
+        <div class="card border rounded-4 shadow-sm bg-white p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+              <h5 class="fw-bold text-dark mb-0">Feature Requests & Bug Reporting Tracker</h5>
+              <p class="text-muted small mb-0">Community recommendations reviewed by college administrators.</p>
+            </div>
+          </div>
+
+          <div id="suggestions-container" class="d-flex flex-column gap-3">
+            <div class="text-center py-4 text-muted">Loading platform recommendations...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggestion Modal -->
+  <div class="modal fade" id="suggestionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom pb-3">
+          <h5 class="modal-title fw-bold">Submit Platform Suggestion or Bug</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="sug-modal-alert" class="alert alert-danger d-none"></div>
+
+          <form id="suggestion-form">
+            <div class="mb-3">
+              <label for="sug-type" class="form-label small fw-semibold">Feedback Type</label>
+              <select id="sug-type" class="form-select" required>
+                <option value="feature">Feature Request</option>
+                <option value="improvement">Platform Improvement</option>
+                <option value="bug">Bug Report</option>
+                <option value="other">Other Inquiry</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="sug-title" class="form-label small fw-semibold">Title <span class="text-danger">*</span></label>
+              <input type="text" id="sug-title" class="form-control" placeholder="e.g. Export tickets directly to Google Calendar" required minlength="4">
+            </div>
+
+            <div class="mb-4">
+              <label for="sug-desc" class="form-label small fw-semibold">Details & Suggestions <span class="text-danger">*</span></label>
+              <textarea id="sug-desc" class="form-control" rows="4" placeholder="Explain the expected benefit, steps to reproduce, or user experience enhancement..." required></textarea>
+            </div>
+
+            <button type="submit" id="sug-submit-btn" class="btn btn-primary w-100 py-2 rounded-3 fw-bold">
+              Submit Recommendation
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Organizer Response Modal -->
+  <div class="modal fade" id="respondModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom pb-3">
+          <h5 class="modal-title fw-bold">Respond to Student Review</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="resp-fb-id" value="">
+          <div class="mb-3">
+            <label for="resp-text" class="form-label small fw-semibold">Official Organizer Response</label>
+            <textarea id="resp-text" class="form-control" rows="4" placeholder="Thank the student, address questions, or describe improvements for next time..." required></textarea>
+          </div>
+          <button type="button" id="save-resp-btn" class="btn btn-primary w-100 py-2 rounded-3 fw-bold">
+            Publish Response
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadEventFeedbacks();
+      await loadPlatformSuggestions();
+
+      // Sentiment filter
+      document.getElementById('sentiment-filter').addEventListener('change', () => {
+        loadEventFeedbacks();
+      });
+
+      // Suggestion form submission
+      document.getElementById('suggestion-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!Auth.isLoggedIn()) {
+          window.location.href = '/login.html';
+          return;
+        }
+
+        const alertBox = document.getElementById('sug-modal-alert');
+        alertBox.classList.add('d-none');
+
+        const title = document.getElementById('sug-title').value.trim();
+        const description = document.getElementById('sug-desc').value.trim();
+        const type = document.getElementById('sug-type').value;
+
+        try {
+          const res = await api.post('/api/suggestions', { title, description, type });
+          if (res.success) {
+            Utils.showToast('Suggestion submitted! Thank you.', 'success');
+            const modalEl = document.getElementById('suggestionModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            document.getElementById('suggestion-form').reset();
+            await loadPlatformSuggestions();
+          }
+        } catch (err) {
+          alertBox.innerText = err.message;
+          alertBox.classList.remove('d-none');
+        }
+      });
+
+      // Save organizer response
+      document.getElementById('save-resp-btn').addEventListener('click', async () => {
+        const id = document.getElementById('resp-fb-id').value;
+        const respText = document.getElementById('resp-text').value.trim();
+
+        if (!respText) {
+          alert('Response cannot be empty.');
+          return;
+        }
+
+        try {
+          const res = await api.put(`/api/feedback/${id}/respond`, { organizerResponse: respText });
+          if (res.success) {
+            Utils.showToast('Response saved.', 'success');
+            const modalEl = document.getElementById('respondModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            await loadEventFeedbacks();
+          }
+        } catch (err) {
+          Utils.showToast(err.message, 'error');
+        }
+      });
+    });
+
+    async function loadEventFeedbacks() {
+      const container = document.getElementById('event-feedbacks-container');
+      const sentiment = document.getElementById('sentiment-filter').value;
+
+      try {
+        const res = await api.get('/api/feedback', { sentiment, limit: 30 });
+        if (!res.success || !res.data) {
+          container.innerHTML = '<div class="alert alert-danger">Error retrieving feedback.</div>';
+          return;
+        }
+
+        const list = res.data.feedbacks || [];
+        const isOrganizerOrAdmin = Auth.isLoggedIn() && ['organizer', 'admin'].includes(Auth.getCurrentUser().role);
+
+        if (list.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-muted">No feedback records found.</div>';
+          return;
+        }
+
+        container.innerHTML = list.map(fb => {
+          const student = fb.student || {};
+          const ev = fb.event || {};
+          const sentimentClass = fb.sentiment === 'Positive' ? 'bg-success' : fb.sentiment === 'Neutral' ? 'bg-secondary' : 'bg-warning text-dark';
+
+          let replySection = '';
+          if (fb.organizerResponse) {
+            replySection = `
+              <div class="mt-3 p-3 bg-light rounded-3 border-start border-primary border-3">
+                <div class="small fw-bold text-dark"><i class="bi bi-reply-fill text-primary me-1"></i>Organizer Response:</div>
+                <p class="small text-secondary mb-0 mt-1">${Utils.escapeHtml(fb.organizerResponse)}</p>
+              </div>
+            `;
+          } else if (isOrganizerOrAdmin) {
+            replySection = `
+              <div class="mt-2 text-end">
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openRespondModal('${fb._id}')">
+                  <i class="bi bi-reply me-1"></i> Respond to Review
+                </button>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="p-3 bg-light bg-opacity-50 rounded-4 border">
+              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-2">
+                <div>
+                  <h6 class="fw-bold text-dark mb-0">
+                    <a href="/event-details.html?id=${ev._id}" class="text-dark text-decoration-none">
+                      ${Utils.escapeHtml(ev.title || 'Event')}
+                    </a>
+                  </h6>
+                  <span class="small text-muted">Reviewed by <strong>${Utils.escapeHtml(student.name || 'Student')}</strong> &bull; ${Utils.formatDate(fb.createdAt)}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge ${sentimentClass} small">${fb.sentiment || 'Positive'}</span>
+                  ${Utils.renderStarRating(fb.rating)}
+                </div>
+              </div>
+
+              <p class="small text-secondary mb-2">${Utils.escapeHtml(fb.comment || 'No written comment.')}</p>
+
+              <div class="d-flex flex-wrap gap-2 text-muted" style="font-size: 0.75rem;">
+                <span class="badge bg-white border text-dark">Quality: ${fb.qualityRating}/5</span>
+                <span class="badge bg-white border text-dark">Organization: ${fb.organizationRating}/5</span>
+                <span class="badge bg-white border text-dark">Venue: ${fb.venueRating}/5</span>
+                <span class="badge bg-white border text-dark">Content: ${fb.contentRelevanceRating}/5</span>
+              </div>
+
+              ${replySection}
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    async function loadPlatformSuggestions() {
+      const container = document.getElementById('suggestions-container');
+      try {
+        const res = await api.get('/api/suggestions');
+        if (!res.success || !res.data) {
+          container.innerHTML = '<div class="alert alert-danger">Error retrieving suggestions.</div>';
+          return;
+        }
+
+        const list = res.data || [];
+        const isAdmin = Auth.isLoggedIn() && Auth.getCurrentUser().role === 'admin';
+
+        if (list.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-muted">No suggestions submitted yet. Have an idea? Submit one above!</div>';
+          return;
+        }
+
+        container.innerHTML = list.map(s => {
+          const statusBadge =
+            s.status === 'implemented' ? 'bg-success' :
+            s.status === 'planned' ? 'bg-primary' :
+            s.status === 'in-review' ? 'bg-info text-dark' : 'bg-secondary';
+
+          return `
+            <div class="p-3 bg-light bg-opacity-50 rounded-4 border">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-white border text-dark text-uppercase small">${s.type}</span>
+                  <h6 class="fw-bold text-dark mb-0">${Utils.escapeHtml(s.title)}</h6>
+                </div>
+                <span class="badge ${statusBadge} small text-uppercase">${s.status}</span>
+              </div>
+
+              <p class="small text-secondary mb-2">${Utils.escapeHtml(s.description)}</p>
+
+              ${s.adminNotes ? `
+                <div class="p-2 rounded-3 bg-white border small text-muted">
+                  <strong><i class="bi bi-shield-check text-primary me-1"></i>Admin Note:</strong> ${Utils.escapeHtml(s.adminNotes)}
+                </div>
+              ` : ''}
+
+              ${isAdmin ? `
+                <div class="mt-3 pt-2 border-top d-flex gap-2 justify-content-end align-items-center">
+                  <span class="small text-muted me-1">Change Status:</span>
+                  <select class="form-select form-select-sm" style="width: auto;" onchange="updateSuggestionStatus('${s._id}', this.value)">
+                    <option value="submitted" ${s.status === 'submitted' ? 'selected' : ''}>Submitted</option>
+                    <option value="in-review" ${s.status === 'in-review' ? 'selected' : ''}>In-Review</option>
+                    <option value="planned" ${s.status === 'planned' ? 'selected' : ''}>Planned</option>
+                    <option value="implemented" ${s.status === 'implemented' ? 'selected' : ''}>Implemented</option>
+                  </select>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    function openRespondModal(fbId) {
+      document.getElementById('resp-fb-id').value = fbId;
+      document.getElementById('resp-text').value = '';
+      const modal = new bootstrap.Modal(document.getElementById('respondModal'));
+      modal.show();
+    }
+
+    async function updateSuggestionStatus(id, newStatus) {
+      try {
+        const res = await api.put(`/api/suggestions/${id}`, { status: newStatus });
+        if (res.success) {
+          Utils.showToast(`Status updated to ${newStatus}`, 'success');
+          await loadPlatformSuggestions();
+        }
+      } catch (err) {
+        Utils.showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

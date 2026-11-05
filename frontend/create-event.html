@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host New Event | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-container"></div>
+
+  <div class="container-xl py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <!-- Form Card -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+          <div class="p-4 p-sm-5 border-bottom bg-gradient" style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);">
+            <div class="text-white">
+              <span class="badge bg-white text-primary mb-2 fw-bold">EVENT PROPOSAL DESK</span>
+              <h2 class="fw-bold mb-1">Create New Campus Event</h2>
+              <p class="mb-0 opacity-75 small">Fill in the event logistics, venue reservation, capacity limits, and visual banner.</p>
+            </div>
+          </div>
+
+          <div class="p-4 p-sm-5">
+            <div id="create-event-alert" class="alert alert-danger d-none" role="alert"></div>
+
+            <form id="create-event-form">
+              <!-- Basic Information -->
+              <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle me-2 text-primary"></i>Event Details</h5>
+
+              <div class="mb-3">
+                <label for="event-title" class="form-label small fw-semibold">Event Title <span class="text-danger">*</span></label>
+                <input type="text" id="event-title" class="form-control" placeholder="e.g. Annual Autonomous Robotics Hackathon 2026" required minlength="2" maxlength="200">
+                <div class="form-text small">Between 2 and 200 characters. Must be unique for your organization per date.</div>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label for="event-category" class="form-label small fw-semibold">Category <span class="text-danger">*</span></label>
+                  <select id="event-category" class="form-select" required>
+                    <option value="">Choose category...</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Social">Social</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Seminar">Seminar</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="event-budget" class="form-label small fw-semibold">Budget Allocation ($) <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white text-muted">$</span>
+                    <input type="number" id="event-budget" class="form-control" placeholder="0" min="0" step="0.01" value="0" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="event-description" class="form-label small fw-semibold">Event Description & Agenda <span class="text-danger">*</span></label>
+                <textarea id="event-description" class="form-control" rows="5" placeholder="Provide a detailed overview of the event, itinerary, guest speakers, prerequisites, and learning objectives (Minimum 50 characters)..." required minlength="50"></textarea>
+                <div class="form-text small">Minimum 50 characters. Current length: <span id="desc-char-count" class="fw-bold">0</span></div>
+              </div>
+
+              <!-- Date & Time Logistics -->
+              <h5 class="fw-bold text-dark mb-3 pt-3 border-top"><i class="bi bi-clock-history me-2 text-primary"></i>Schedule & Timing</h5>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6 col-lg-3">
+                  <label for="event-start-date" class="form-label small fw-semibold">Start Date <span class="text-danger">*</span></label>
+                  <input type="date" id="event-start-date" class="form-control" required>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label for="event-start-time" class="form-label small fw-semibold">Start Time <span class="text-danger">*</span></label>
+                  <input type="time" id="event-start-time" class="form-control" required value="10:00">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label for="event-end-date" class="form-label small fw-semibold">End Date <span class="text-danger">*</span></label>
+                  <input type="date" id="event-end-date" class="form-control" required>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label for="event-end-time" class="form-label small fw-semibold">End Time <span class="text-danger">*</span></label>
+                  <input type="time" id="event-end-time" class="form-control" required value="12:00">
+                </div>
+                <div class="col-12">
+                  <div class="form-text small text-primary"><i class="bi bi-info-circle me-1"></i>Start date must be in the future, and minimum duration must be at least 1 hour.</div>
+                </div>
+              </div>
+
+              <!-- Venue & Capacity -->
+              <h5 class="fw-bold text-dark mb-3 pt-3 border-top"><i class="bi bi-building me-2 text-primary"></i>Venue & Capacity</h5>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-7">
+                  <label for="event-venue" class="form-label small fw-semibold">Selected Campus Venue <span class="text-danger">*</span></label>
+                  <select id="event-venue" class="form-select" required>
+                    <option value="">Select venue...</option>
+                  </select>
+                  <div class="form-text small" id="venue-cap-info">Choose a venue to view its max capacity.</div>
+                </div>
+                <div class="col-md-5">
+                  <label for="event-capacity" class="form-label small fw-semibold">Event Capacity (RSVP limit) <span class="text-danger">*</span></label>
+                  <input type="number" id="event-capacity" class="form-control" placeholder="100" min="1" required>
+                  <div class="form-text small">Cannot exceed maximum venue capacity.</div>
+                </div>
+              </div>
+
+              <!-- Poster Image Upload -->
+              <h5 class="fw-bold text-dark mb-3 pt-3 border-top"><i class="bi bi-image me-2 text-primary"></i>Poster Banner</h5>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label for="poster-file" class="form-label small fw-semibold">Upload Image File (JPG / PNG, max 5MB)</label>
+                  <input type="file" id="poster-file" class="form-control" accept=".jpg,.jpeg,.png">
+                </div>
+                <div class="col-md-6">
+                  <label for="poster-url" class="form-label small fw-semibold">Or Image URL</label>
+                  <input type="url" id="poster-url" class="form-control" placeholder="https://images.unsplash.com/...">
+                </div>
+              </div>
+
+              <!-- Form Buttons -->
+              <div class="pt-4 border-top d-flex flex-wrap gap-2 justify-content-end">
+                <a href="/organizer-dashboard.html" class="btn btn-secondary rounded-pill px-4">
+                  Cancel
+                </a>
+                <button type="button" id="save-draft-btn" class="btn btn-outline-primary rounded-pill px-4">
+                  Save as Draft
+                </button>
+                <button type="submit" id="submit-event-btn" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
+                  Publish / Submit for Approval
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let venuesData = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireAuth(['organizer', 'admin'])) return;
+
+      // Set minimum date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      document.getElementById('event-start-date').min = tomorrowStr;
+      document.getElementById('event-start-date').value = tomorrowStr;
+      document.getElementById('event-end-date').min = tomorrowStr;
+      document.getElementById('event-end-date').value = tomorrowStr;
+
+      // Live char counter
+      const descInput = document.getElementById('event-description');
+      const counter = document.getElementById('desc-char-count');
+      descInput.addEventListener('input', () => {
+        counter.innerText = descInput.value.length;
+        if (descInput.value.length >= 50) {
+          counter.className = 'fw-bold text-success';
+        } else {
+          counter.className = 'fw-bold text-danger';
+        }
+      });
+
+      await loadVenues();
+
+      // Venue change listener
+      const venueSelect = document.getElementById('event-venue');
+      const capInput = document.getElementById('event-capacity');
+      const capInfo = document.getElementById('venue-cap-info');
+
+      venueSelect.addEventListener('change', () => {
+        const v = venuesData.find(item => item._id === venueSelect.value);
+        if (v) {
+          capInfo.innerHTML = `Selected venue max capacity: <strong class="text-primary">${v.capacity}</strong> attendees.`;
+          capInput.max = v.capacity;
+          if (!capInput.value || Number(capInput.value) > v.capacity) {
+            capInput.value = v.capacity;
+          }
+        } else {
+          capInfo.innerText = 'Choose a venue to view its max capacity.';
+        }
+      });
+
+      // Submit handlers
+      const form = document.getElementById('create-event-form');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleEventSubmit('publish');
+      });
+
+      document.getElementById('save-draft-btn').addEventListener('click', () => {
+        handleEventSubmit('draft');
+      });
+    });
+
+    async function loadVenues() {
+      try {
+        const res = await api.get('/api/venues');
+        if (res.success && res.data) {
+          venuesData = res.data;
+          const select = document.getElementById('event-venue');
+          venuesData.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v._id;
+            opt.textContent = `${v.name} (${v.location} - Max: ${v.capacity})`;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.warn('Venues load error:', err.message);
+      }
+    }
+
+    async function handleEventSubmit(actionType) {
+      const alertBox = document.getElementById('create-event-alert');
+      alertBox.classList.add('d-none');
+
+      const submitBtn = document.getElementById('submit-event-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+
+      const title = document.getElementById('event-title').value.trim();
+      const category = document.getElementById('event-category').value;
+      const budget = document.getElementById('event-budget').value;
+      const description = document.getElementById('event-description').value.trim();
+      const startDate = document.getElementById('event-start-date').value;
+      const endDate = document.getElementById('event-end-date').value;
+      const startTime = document.getElementById('event-start-time').value;
+      const endTime = document.getElementById('event-end-time').value;
+      const venue = document.getElementById('event-venue').value;
+      const capacity = document.getElementById('event-capacity').value;
+
+      let posterImage = document.getElementById('poster-url').value.trim();
+      const fileInput = document.getElementById('poster-file');
+
+      // If file uploaded, upload it first
+      if (fileInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+        try {
+          const uploadRes = await api.upload(formData);
+          if (uploadRes.success && uploadRes.data) {
+            posterImage = uploadRes.data.url;
+          }
+        } catch (uploadErr) {
+          alertBox.innerText = 'Image upload failed: ' + uploadErr.message;
+          alertBox.classList.remove('d-none');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Publish / Submit for Approval';
+          return;
+        }
+      }
+
+      // Default fallback banner if empty
+      if (!posterImage) {
+        posterImage = 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
+      }
+
+      const payload = {
+        title,
+        category,
+        budget: Number(budget),
+        description,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        venue,
+        capacity: Number(capacity),
+        posterImage,
+        status: actionType === 'draft' ? 'draft' : undefined,
+      };
+
+      try {
+        const res = await api.post('/api/events', payload);
+        if (res.success && res.data) {
+          Utils.showToast(res.message, 'success');
+          setTimeout(() => {
+            window.location.href = `/event-details.html?id=${res.data._id}`;
+          }, 1000);
+        }
+      } catch (error) {
+        alertBox.innerText = error.message;
+        alertBox.classList.remove('d-none');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Publish / Submit for Approval';
+      }
+    }
+  </script>
+</body>
+</html>

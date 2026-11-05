@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Event | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-container"></div>
+
+  <div class="container-xl py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+          <div class="p-4 p-sm-5 border-bottom bg-gradient" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+            <div class="text-white">
+              <span class="badge bg-primary mb-2 fw-bold" id="edit-mode-badge">MODIFY EVENT</span>
+              <h2 class="fw-bold mb-1" id="edit-header-title">Edit Event Details</h2>
+              <p class="mb-0 opacity-75 small">Update schedules, descriptions, capacities, or reschedule timing.</p>
+            </div>
+          </div>
+
+          <div class="p-4 p-sm-5">
+            <div id="edit-event-alert" class="alert alert-danger d-none" role="alert"></div>
+
+            <form id="edit-event-form">
+              <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle me-2 text-primary"></i>Event Information</h5>
+
+              <div class="mb-3">
+                <label for="edit-title" class="form-label small fw-semibold">Event Title <span class="text-danger">*</span></label>
+                <input type="text" id="edit-title" class="form-control" required minlength="2" maxlength="200">
+              </div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label for="edit-category" class="form-label small fw-semibold">Category <span class="text-danger">*</span></label>
+                  <select id="edit-category" class="form-select" required>
+                    <option value="Academic">Academic</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Social">Social</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Seminar">Seminar</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="edit-budget" class="form-label small fw-semibold">Budget Allocation ($)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white text-muted">$</span>
+                    <input type="number" id="edit-budget" class="form-control" min="0" step="0.01">
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="edit-description" class="form-label small fw-semibold">Event Description <span class="text-danger">*</span></label>
+                <textarea id="edit-description" class="form-control" rows="5" required minlength="50"></textarea>
+                <div class="form-text small">Minimum 50 characters. Current length: <span id="edit-desc-count" class="fw-bold">0</span></div>
+              </div>
+
+              <!-- Reschedule Section -->
+              <h5 class="fw-bold text-dark mb-3 pt-3 border-top"><i class="bi bi-calendar2-range me-2 text-primary"></i>Event Schedule & Rescheduling</h5>
+
+              <div class="p-3 bg-light rounded-3 border mb-3" id="reschedule-warning-box">
+                <div class="small fw-bold text-dark mb-1"><i class="bi bi-bell-fill text-warning me-1"></i> Reschedule Notification:</div>
+                <div class="small text-secondary">
+                  Modifying the event date or start time will automatically notify all registered attendees with an event update notification.
+                </div>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6 col-lg-3">
+                  <label for="edit-start-date" class="form-label small fw-semibold">Start Date <span class="text-danger">*</span></label>
+                  <input type="date" id="edit-start-date" class="form-control" required>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label for="edit-start-time" class="form-label small fw-semibold">Start Time <span class="text-danger">*</span></label>
+                  <input type="time" id="edit-start-time" class="form-control" required>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label for="edit-end-date" class="form-label small fw-semibold">End Date <span class="text-danger">*</span></label>
+                  <input type="date" id="edit-end-date" class="form-control" required>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label for="edit-end-time" class="form-label small fw-semibold">End Time <span class="text-danger">*</span></label>
+                  <input type="time" id="edit-end-time" class="form-control" required>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="edit-reschedule-reason" class="form-label small fw-semibold">Reschedule Reason (Included in attendee notifications)</label>
+                <input type="text" id="edit-reschedule-reason" class="form-control" placeholder="e.g. Venue upgrade or speaker scheduling accommodation">
+              </div>
+
+              <!-- Venue & Capacity -->
+              <h5 class="fw-bold text-dark mb-3 pt-3 border-top"><i class="bi bi-building me-2 text-primary"></i>Venue & Capacity</h5>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-7">
+                  <label for="edit-venue" class="form-label small fw-semibold">Campus Venue <span class="text-danger">*</span></label>
+                  <select id="edit-venue" class="form-select" required></select>
+                  <div class="form-text small" id="edit-venue-cap-info"></div>
+                </div>
+                <div class="col-md-5">
+                  <label for="edit-capacity" class="form-label small fw-semibold">Event Capacity <span class="text-danger">*</span></label>
+                  <input type="number" id="edit-capacity" class="form-control" min="1" required>
+                  <div class="form-text small" id="current-registered-info"></div>
+                </div>
+              </div>
+
+              <!-- Poster Image -->
+              <h5 class="fw-bold text-dark mb-3 pt-3 border-top"><i class="bi bi-image me-2 text-primary"></i>Poster Banner</h5>
+              <div class="mb-4">
+                <label for="edit-poster" class="form-label small fw-semibold">Poster Image URL</label>
+                <input type="url" id="edit-poster" class="form-control">
+              </div>
+
+              <!-- Form Buttons -->
+              <div class="pt-4 border-top d-flex flex-wrap gap-2 justify-content-end">
+                <a href="javascript:history.back()" class="btn btn-secondary rounded-pill px-4">
+                  Cancel
+                </a>
+                <button type="submit" id="save-edit-btn" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let eventId = '';
+    let existingEvent = null;
+    let venuesData = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireAuth(['organizer', 'admin'])) return;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      eventId = urlParams.get('id');
+
+      if (!eventId) {
+        alert('No event ID provided.');
+        window.location.href = '/organizer-dashboard.html';
+        return;
+      }
+
+      await loadVenues();
+      await loadExistingEvent();
+
+      // Description char count
+      const descInput = document.getElementById('edit-description');
+      const counter = document.getElementById('edit-desc-count');
+      descInput.addEventListener('input', () => {
+        counter.innerText = descInput.value.length;
+        counter.className = descInput.value.length >= 50 ? 'fw-bold text-success' : 'fw-bold text-danger';
+      });
+
+      // Submit
+      document.getElementById('edit-event-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveEventChanges();
+      });
+    });
+
+    async function loadVenues() {
+      try {
+        const res = await api.get('/api/venues');
+        if (res.success && res.data) {
+          venuesData = res.data;
+          const select = document.getElementById('edit-venue');
+          venuesData.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v._id;
+            opt.textContent = `${v.name} (Cap: ${v.capacity})`;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.warn('Venues error:', err.message);
+      }
+    }
+
+    async function loadExistingEvent() {
+      try {
+        const res = await api.get(`/api/events/${eventId}`);
+        if (!res.success || !res.data) throw new Error('Event not found');
+
+        existingEvent = res.data;
+        document.getElementById('edit-header-title').innerText = `Edit: ${existingEvent.title}`;
+        document.getElementById('edit-title').value = existingEvent.title;
+        document.getElementById('edit-category').value = existingEvent.category;
+        document.getElementById('edit-budget').value = existingEvent.budget || 0;
+        document.getElementById('edit-description').value = existingEvent.description;
+        document.getElementById('edit-desc-count').innerText = existingEvent.description.length;
+
+        // Dates
+        const sDate = new Date(existingEvent.startDate).toISOString().split('T')[0];
+        const eDate = new Date(existingEvent.endDate).toISOString().split('T')[0];
+        document.getElementById('edit-start-date').value = sDate;
+        document.getElementById('edit-end-date').value = eDate;
+        document.getElementById('edit-start-time').value = existingEvent.startTime;
+        document.getElementById('edit-end-time').value = existingEvent.endTime;
+
+        if (existingEvent.venue) {
+          document.getElementById('edit-venue').value = existingEvent.venue._id || existingEvent.venue;
+        }
+
+        document.getElementById('edit-capacity').value = existingEvent.capacity;
+        document.getElementById('current-registered-info').innerHTML = `Current registered attendees: <strong class="text-primary">${existingEvent.registeredCount || 0}</strong>`;
+        document.getElementById('edit-poster').value = existingEvent.posterImage || '';
+      } catch (err) {
+        Utils.showToast(err.message, 'error');
+      }
+    }
+
+    async function saveEventChanges() {
+      const alertBox = document.getElementById('edit-event-alert');
+      alertBox.classList.add('d-none');
+
+      const saveBtn = document.getElementById('save-edit-btn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+      const title = document.getElementById('edit-title').value.trim();
+      const category = document.getElementById('edit-category').value;
+      const budget = document.getElementById('edit-budget').value;
+      const description = document.getElementById('edit-description').value.trim();
+      const startDate = document.getElementById('edit-start-date').value;
+      const endDate = document.getElementById('edit-end-date').value;
+      const startTime = document.getElementById('edit-start-time').value;
+      const endTime = document.getElementById('edit-end-time').value;
+      const venue = document.getElementById('edit-venue').value;
+      const capacity = document.getElementById('edit-capacity').value;
+      const posterImage = document.getElementById('edit-poster').value.trim();
+      const rescheduleReason = document.getElementById('edit-reschedule-reason').value.trim();
+
+      const payload = {
+        title,
+        category,
+        budget: Number(budget),
+        description,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        venue,
+        capacity: Number(capacity),
+        posterImage,
+        rescheduleReason: rescheduleReason || undefined,
+      };
+
+      try {
+        const res = await api.put(`/api/events/${eventId}`, payload);
+        if (res.success) {
+          Utils.showToast('Event updated successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = `/event-details.html?id=${eventId}`;
+          }, 800);
+        }
+      } catch (err) {
+        alertBox.innerText = err.message;
+        alertBox.classList.remove('d-none');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Save Changes';
+      }
+    }
+  </script>
+</body>
+</html>

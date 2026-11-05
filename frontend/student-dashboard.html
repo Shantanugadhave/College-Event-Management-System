@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <div class="dashboard-layout">
+    <!-- Student Sidebar -->
+    <div class="dashboard-sidebar">
+      <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+        <div class="user-nav-avatar bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-5" id="sidebar-avatar">
+          S
+        </div>
+        <div>
+          <h6 class="fw-bold text-dark mb-0" id="sidebar-student-name">Student</h6>
+          <span class="badge bg-success small">Student Portal</span>
+        </div>
+      </div>
+
+      <div class="sidebar-heading">Navigation</div>
+      <a href="/student-dashboard.html" class="sidebar-nav-item active">
+        <i class="bi bi-grid-1x2"></i> Overview
+      </a>
+      <a href="/my-events.html" class="sidebar-nav-item">
+        <i class="bi bi-ticket-perforated"></i> My Registrations & Passes
+      </a>
+      <a href="/events.html" class="sidebar-nav-item">
+        <i class="bi bi-compass"></i> Explore All Events
+      </a>
+      <a href="/feedback.html" class="sidebar-nav-item">
+        <i class="bi bi-chat-heart"></i> My Feedback & Ideas
+      </a>
+      <a href="/notifications.html" class="sidebar-nav-item">
+        <i class="bi bi-bell"></i> Notifications
+      </a>
+      <a href="/profile.html" class="sidebar-nav-item">
+        <i class="bi bi-person-gear"></i> Profile & Interests
+      </a>
+
+      <div class="mt-auto pt-3 border-top">
+        <a href="javascript:void(0)" onclick="Auth.logout()" class="sidebar-nav-item text-danger">
+          <i class="bi bi-box-arrow-right"></i> Sign Out
+        </a>
+      </div>
+    </div>
+
+    <!-- Student Dashboard Main Content -->
+    <div class="dashboard-content">
+      <!-- Welcome Header -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold text-dark mb-1">Welcome, <span id="welcome-name">Student</span>! 👋</h2>
+          <p class="text-muted small mb-0">Track your confirmed RSVPs, digital passes, and curated campus recommendations.</p>
+        </div>
+        <a href="/events.html" class="btn btn-primary rounded-pill px-4">
+          <i class="bi bi-search me-1"></i> Browse More Events
+        </a>
+      </div>
+
+      <!-- Quick Metrics Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Active Registrations</div>
+              <div class="stat-value text-primary" id="stat-registered-count">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-primary">
+              <i class="bi bi-ticket-perforated"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Attended Events</div>
+              <div class="stat-value text-success" id="stat-attended-count">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-success">
+              <i class="bi bi-patch-check-fill"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Feedback Given</div>
+              <div class="stat-value text-warning" id="stat-feedback-count">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-warning">
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">My Interests</div>
+              <div class="stat-value text-info fs-4 mt-2" id="stat-interests-summary">--</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-info">
+              <i class="bi bi-tags-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Upcoming Event Digital Pass Spotlight -->
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white" id="next-event-spotlight-card">
+        <div class="p-4 bg-primary bg-opacity-10 border-bottom border-primary border-opacity-25 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-qr-code fs-4 text-primary"></i>
+            <h5 class="fw-bold text-dark mb-0">Your Next Confirmed Admission Pass</h5>
+          </div>
+          <a href="/my-events.html" class="small fw-bold text-primary text-decoration-none">View All Passes &rarr;</a>
+        </div>
+        <div class="p-4" id="spotlight-content">
+          <div class="text-center py-3 text-muted">Checking confirmed tickets...</div>
+        </div>
+      </div>
+
+      <!-- Personalized Recommendations -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="fw-bold text-dark mb-0">Recommended For You</h4>
+            <p class="text-muted small mb-0">Curated based on your interests and campus engagement</p>
+          </div>
+          <a href="/profile.html" class="small fw-semibold text-primary">Customize Interests</a>
+        </div>
+
+        <div class="row g-4" id="recommendations-grid">
+          <div class="col-12 text-center py-4">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+            <span class="ms-2 small text-muted">Finding recommended events...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Notifications & Updates -->
+      <div class="card border rounded-4 shadow-sm bg-white p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0"><i class="bi bi-bell me-2 text-warning"></i>Recent Campus Notifications</h5>
+          <a href="/notifications.html" class="small fw-bold text-primary">Notification Center &rarr;</a>
+        </div>
+        <div id="recent-notifications-list" class="d-flex flex-column gap-2">
+          <div class="text-muted small py-2">Loading notifications...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Pass Modal -->
+  <div class="modal fade" id="ticketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Campus Entry Pass</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <div class="qr-ticket-card mb-3">
+            <span class="badge bg-primary px-3 py-1 rounded-pill mb-2">OFFICIAL RSVP PASS</span>
+            <h5 class="fw-bold text-dark mb-1" id="ticket-modal-title">Event Title</h5>
+            <div class="text-muted small mb-3" id="ticket-modal-meta">Date &bull; Time</div>
+
+            <div class="p-3 bg-light rounded-3 d-inline-block border mb-3">
+              <img id="ticket-modal-qr" src="" alt="QR Pass" class="img-fluid" style="width: 200px; height: 200px;">
+            </div>
+
+            <div class="small fw-mono text-dark fw-bold" id="ticket-modal-code">TICKET-CODE</div>
+          </div>
+          <p class="small text-muted mb-0">Present this QR pass to the organizer at the venue entrance.</p>
+        </div>
+        <div class="modal-footer border-0 pt-0 d-flex flex-column gap-2">
+          <a id="ticket-modal-verify-btn" href="#" target="_blank" class="btn btn-outline-primary w-100 rounded-3">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Open Verification / Ticket Page
+          </a>
+          <button type="button" class="btn btn-secondary w-100 rounded-3" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Require student or admin
+      if (!Auth.requireAuth(['student', 'admin'])) return;
+
+      const user = Auth.getCurrentUser();
+      document.getElementById('sidebar-student-name').innerText = user.name;
+      document.getElementById('welcome-name').innerText = user.name.split(' ')[0];
+      document.getElementById('sidebar-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+      const interests = user.interests || [];
+      document.getElementById('stat-interests-summary').innerText = interests.length > 0 ? interests.slice(0, 2).join(', ') : 'None Set';
+
+      await loadStudentOverview();
+      await loadNextPass();
+      await loadRecentNotifications();
+    });
+
+    async function loadStudentOverview() {
+      try {
+        const res = await api.get('/api/reports/student-overview');
+        if (res.success && res.data) {
+          const { stats, recommendations } = res.data;
+          document.getElementById('stat-registered-count').innerText = stats.registeredCount || 0;
+          document.getElementById('stat-attended-count').innerText = stats.attendedCount || 0;
+          document.getElementById('stat-feedback-count').innerText = stats.feedbacksGiven || 0;
+
+          // Render recommendations
+          renderRecommendations(recommendations);
+        }
+      } catch (e) {
+        console.warn('Overview load error:', e.message);
+      }
+    }
+
+    async function loadNextPass() {
+      const container = document.getElementById('spotlight-content');
+      try {
+        const res = await api.get('/api/registrations', { status: 'registered', limit: 1 });
+        if (res.success && res.data && res.data.registrations && res.data.registrations.length > 0) {
+          const reg = res.data.registrations[0];
+          const ev = reg.event;
+          if (!ev) {
+            container.innerHTML = '<div class="text-muted small">No upcoming tickets found. Explore campus events to RSVP!</div>';
+            return;
+          }
+
+          container.innerHTML = `
+            <div class="row align-items-center g-4">
+              <div class="col-md-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  ${Utils.getCategoryBadge(ev.category)}
+                  <span class="badge bg-success bg-opacity-10 text-success small">Confirmed Admission</span>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">
+                  <a href="/event-details.html?id=${ev._id}" class="text-dark text-decoration-none">
+                    ${Utils.escapeHtml(ev.title)}
+                  </a>
+                </h4>
+                <div class="d-flex flex-wrap gap-3 text-muted small mb-3">
+                  <span><i class="bi bi-calendar3 text-primary me-1"></i> ${Utils.formatDate(ev.startDate)}</span>
+                  <span><i class="bi bi-clock text-primary me-1"></i> ${Utils.formatTime(ev.startTime)}</span>
+                  <span><i class="bi bi-geo-alt text-danger me-1"></i> ${Utils.escapeHtml(ev.venue?.name || 'Campus Venue')}</span>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-primary rounded-pill px-4" onclick="openTicketModal('${encodeURIComponent(JSON.stringify(reg))}')">
+                    <i class="bi bi-qr-code me-1"></i> Display QR Entry Code
+                  </button>
+                  <a href="/event-details.html?id=${ev._id}" class="btn btn-outline-secondary rounded-pill px-3">
+                    Event Details
+                  </a>
+                </div>
+              </div>
+              <div class="col-md-4 text-center border-start-md">
+                <div class="p-2 d-inline-block bg-white border rounded-3 shadow-sm">
+                  <img src="${reg.qrCodeDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(window.location.origin + '/verify-ticket.html?ticket=' + reg.qrCode)}`}" alt="Ticket QR" style="width:120px; height:120px;">
+                </div>
+                <div class="small fw-mono text-muted mt-2">${reg.qrCode}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="text-center py-3">
+              <p class="text-muted small mb-3">You have no active event reservations.</p>
+              <a href="/events.html" class="btn btn-sm btn-primary rounded-pill px-4">
+                Explore & RSVP Events
+              </a>
+            </div>
+          `;
+        }
+      } catch (e) {
+        container.innerHTML = `<div class="text-danger small">${e.message}</div>`;
+      }
+    }
+
+    function renderRecommendations(recommendations) {
+      const container = document.getElementById('recommendations-grid');
+      if (!recommendations || recommendations.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-4 bg-white rounded-3 border">
+            <div class="text-muted small">No direct recommendation matches at the moment. Browse all events!</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = recommendations.slice(0, 3).map(ev => `
+        <div class="col-md-4">
+          <div class="card h-100 border p-3 rounded-4 shadow-sm bg-white hover-lift">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              ${Utils.getCategoryBadge(ev.category)}
+              <span class="small text-muted">${Utils.formatDate(ev.startDate, { shortMonth: true })}</span>
+            </div>
+            <h6 class="fw-bold text-dark mb-2">
+              <a href="/event-details.html?id=${ev._id}" class="text-dark text-decoration-none">
+                ${Utils.escapeHtml(ev.title)}
+              </a>
+            </h6>
+            <div class="small text-muted mb-3"><i class="bi bi-geo-alt me-1 text-danger"></i>${Utils.escapeHtml(ev.venue?.name || 'Campus Venue')}</div>
+            <a href="/event-details.html?id=${ev._id}" class="btn btn-sm btn-outline-primary w-100 mt-auto rounded-pill">
+              View & Register
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadRecentNotifications() {
+      const container = document.getElementById('recent-notifications-list');
+      try {
+        const res = await api.get('/api/notifications', { limit: 4 });
+        if (res.success && res.data && res.data.notifications.length > 0) {
+          container.innerHTML = res.data.notifications.slice(0, 4).map(n => `
+            <div class="p-3 bg-light rounded-3 d-flex align-items-start justify-content-between gap-3 ${!n.isRead ? 'border-start border-primary border-3' : ''}">
+              <div>
+                <div class="fw-bold small text-dark">${Utils.escapeHtml(n.title)}</div>
+                <div class="text-secondary small mt-1">${Utils.escapeHtml(n.message)}</div>
+                <div class="text-muted" style="font-size:0.75rem;">${Utils.formatDate(n.createdAt)}</div>
+              </div>
+              ${!n.isRead ? '<span class="badge bg-primary">New</span>' : ''}
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div class="text-muted small py-2">No new notifications.</div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div class="text-muted small">Notifications unavailable.</div>';
+      }
+    }
+
+    function openTicketModal(regJsonEncoded) {
+      const reg = JSON.parse(decodeURIComponent(regJsonEncoded));
+      document.getElementById('ticket-modal-title').innerText = reg.event?.title || 'Event Admission';
+      document.getElementById('ticket-modal-meta').innerText = `${Utils.formatDate(reg.event?.startDate)} at ${Utils.formatTime(reg.event?.startTime)}`;
+      document.getElementById('ticket-modal-code').innerText = reg.qrCode;
+
+      const verifyBtn = document.getElementById('ticket-modal-verify-btn');
+      if (verifyBtn) {
+        verifyBtn.href = `/verify-ticket.html?ticket=${encodeURIComponent(reg.qrCode)}`;
+      }
+
+      const verifyUrl = `${window.location.origin}/verify-ticket.html?ticket=${encodeURIComponent(reg.qrCode)}`;
+      const img = document.getElementById('ticket-modal-qr');
+      img.src = reg.qrCodeDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verifyUrl)}`;
+
+      const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+      modal.show();
+    }
+  </script>
+</body>
+</html>

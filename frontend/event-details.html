@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Details | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <div class="container-xl py-4" id="main-content">
+    <div id="loading-spinner" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-muted">Loading event details...</p>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="event-error-alert" class="alert alert-danger d-none" role="alert"></div>
+
+    <!-- Event Container -->
+    <div id="event-container" class="d-none">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/events.html">Events</a></li>
+          <li class="breadcrumb-item active" id="breadcrumb-title" aria-current="page">Details</li>
+        </ol>
+      </nav>
+
+      <!-- Event Approval & Workflow Banner -->
+      <div id="event-workflow-banner" class="mb-4 d-none"></div>
+
+      <div class="row g-4">
+        <!-- Main Event Content Left Column -->
+        <div class="col-lg-8">
+          <!-- Poster -->
+          <div class="rounded-4 overflow-hidden shadow-sm mb-4 border bg-dark" style="max-height: 420px;">
+            <img id="event-poster" src="" alt="Event Poster" class="w-100 h-100 object-fit-cover" style="min-height: 280px; max-height: 420px;">
+          </div>
+
+          <!-- Badges & Title -->
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <span id="event-category-badge"></span>
+            <span id="event-status-badge"></span>
+            <span class="badge bg-light text-dark border"><i class="bi bi-eye me-1"></i><span id="event-views">0</span> views</span>
+          </div>
+
+          <h1 class="display-6 fw-bold text-dark mb-3" id="event-title">Event Title</h1>
+
+          <!-- Meta highlights bar -->
+          <div class="p-3 bg-white rounded-3 border shadow-sm mb-4">
+            <div class="row g-3 text-center text-sm-start">
+              <div class="col-sm-4 border-end">
+                <div class="text-muted small fw-semibold"><i class="bi bi-calendar-event me-1 text-primary"></i> Date</div>
+                <div class="fw-bold text-dark" id="event-date">--</div>
+              </div>
+              <div class="col-sm-4 border-end">
+                <div class="text-muted small fw-semibold"><i class="bi bi-clock me-1 text-primary"></i> Time</div>
+                <div class="fw-bold text-dark" id="event-time">--</div>
+              </div>
+              <div class="col-sm-4">
+                <div class="text-muted small fw-semibold"><i class="bi bi-star-fill me-1 text-warning"></i> Rating</div>
+                <div class="fw-bold text-dark" id="event-rating-summary">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="card border p-4 rounded-4 shadow-sm mb-4 bg-white">
+            <h4 class="fw-bold text-dark mb-3">About This Event</h4>
+            <div class="text-secondary leading-relaxed" id="event-description" style="white-space: pre-line; line-height: 1.7;">
+              --
+            </div>
+          </div>
+
+          <!-- Venue & Facilities -->
+          <div class="card border p-4 rounded-4 shadow-sm mb-4 bg-white">
+            <h4 class="fw-bold text-dark mb-3"><i class="bi bi-building me-2 text-primary"></i>Venue Information</h4>
+            <h5 class="fw-bold text-dark mb-1" id="venue-name">Venue Name</h5>
+            <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i><span id="venue-location">Location</span></p>
+
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3">
+                  <div class="small text-muted">Venue Maximum Capacity</div>
+                  <div class="fw-bold fs-5 text-dark" id="venue-capacity">--</div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3">
+                  <div class="small text-muted">Venue Status</div>
+                  <div class="fw-bold fs-5 text-success" id="venue-status">Available</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <span class="small fw-bold text-muted text-uppercase d-block mb-2">Venue Amenities</span>
+              <div id="venue-amenities" class="d-flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+
+          <!-- Reviews & Feedback Section -->
+          <div class="card border p-4 rounded-4 shadow-sm mb-4 bg-white" id="reviews-card">
+            <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+              <div>
+                <h4 class="fw-bold text-dark mb-0">Attendee Reviews & Feedback</h4>
+                <div class="text-muted small" id="reviews-count-text">0 reviews submitted</div>
+              </div>
+              <button class="btn btn-outline-primary btn-sm rounded-pill" id="leave-feedback-btn">
+                <i class="bi bi-chat-dots me-1"></i> Leave Feedback
+              </button>
+            </div>
+
+            <!-- List of Reviews -->
+            <div id="reviews-list-container" class="d-flex flex-column gap-3">
+              <div class="text-muted small py-3">No attendee reviews submitted yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Sidebar Right Column -->
+        <div class="col-lg-4">
+          <div class="position-sticky" style="top: 90px;">
+            <!-- RSVP / Registration Action Box -->
+            <div class="card border p-4 rounded-4 shadow-md bg-white mb-4">
+              <h5 class="fw-bold text-dark mb-3">Registration & RSVP</h5>
+
+              <!-- Capacity Counter -->
+              <div class="p-3 rounded-3 bg-light border mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="small fw-semibold text-muted">Available Spots:</span>
+                  <span class="fw-bold text-dark fs-5" id="seats-available-counter">--</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                  <div id="capacity-progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
+                </div>
+                <div class="d-flex justify-content-between text-muted small mt-1">
+                  <span>Registered: <span id="seats-registered">0</span></span>
+                  <span>Capacity: <span id="seats-total">0</span></span>
+                </div>
+              </div>
+
+              <!-- Student RSVP Action Button Container -->
+              <div id="student-rsvp-actions" class="mb-3">
+                <button id="rsvp-now-btn" class="btn btn-primary w-100 py-3 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                  <i class="bi bi-ticket-perforated fs-5"></i>
+                  <span>Register for Event (RSVP)</span>
+                </button>
+              </div>
+
+              <!-- Already Registered Box -->
+              <div id="registered-badge-box" class="d-none p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 mb-3 text-center">
+                <div class="fw-bold text-success mb-1">
+                  <i class="bi bi-check-circle-fill me-1"></i> You are Registered!
+                </div>
+                <p class="small text-secondary mb-3">Your attendance ticket is confirmed. Present your digital QR pass at check-in.</p>
+                <div class="d-grid gap-2">
+                  <button id="view-qr-pass-btn" class="btn btn-success fw-bold rounded-3">
+                    <i class="bi bi-qr-code me-1"></i> View QR Pass
+                  </button>
+                  <button id="cancel-rsvp-btn" class="btn btn-sm btn-outline-danger rounded-3">
+                    Cancel Registration
+                  </button>
+                </div>
+              </div>
+
+              <!-- Organizer Tools Box -->
+              <div id="organizer-actions-box" class="d-none border-top pt-3 mt-2">
+                <h6 class="fw-bold text-muted small text-uppercase mb-2">Organizer Controls</h6>
+                <div class="d-grid gap-2">
+                  <a href="#" id="edit-event-link" class="btn btn-sm btn-outline-primary rounded-2 text-start">
+                    <i class="bi bi-pencil-square me-2"></i> Edit Event Details
+                  </a>
+                  <a href="#" id="manage-attendees-link" class="btn btn-sm btn-outline-secondary rounded-2 text-start">
+                    <i class="bi bi-people me-2"></i> Manage Attendees & Check-in
+                  </a>
+                  <button id="reschedule-event-btn" class="btn btn-sm btn-outline-warning rounded-2 text-start text-dark">
+                    <i class="bi bi-calendar2-range me-2"></i> Reschedule Event
+                  </button>
+                  <button id="cancel-event-btn" class="btn btn-sm btn-outline-warning rounded-2 text-start text-dark">
+                    <i class="bi bi-x-circle me-2"></i> Cancel Event
+                  </button>
+                  <button id="archive-event-btn" class="btn btn-sm btn-outline-danger rounded-2 text-start">
+                    <i class="bi bi-trash me-2"></i> Archive Event (Delete)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Admin Controls Box -->
+              <div id="admin-actions-box" class="d-none border-top pt-3 mt-3">
+                <h6 class="fw-bold text-muted small text-uppercase mb-2">Admin Actions</h6>
+                <div class="d-grid gap-2">
+                  <button id="admin-approve-btn" class="btn btn-sm btn-success fw-bold rounded-2">
+                    <i class="bi bi-check-lg me-1"></i> Approve & Publish
+                  </button>
+                  <button id="admin-reject-btn" class="btn btn-sm btn-outline-danger rounded-2">
+                    <i class="bi bi-x-circle me-1"></i> Reject Event
+                  </button>
+                  <button id="admin-cancel-btn" class="btn btn-sm btn-outline-warning rounded-2">
+                    <i class="bi bi-x-octagon me-1"></i> Cancel Event
+                  </button>
+                  <button id="admin-delete-btn" class="btn btn-sm btn-danger rounded-2">
+                    <i class="bi bi-trash me-1"></i> Archive / Delete Event
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Organizer Info Card -->
+            <div class="card border p-4 rounded-4 shadow-sm bg-white">
+              <h6 class="fw-bold text-muted small text-uppercase mb-3">Host Information</h6>
+              <div class="d-flex align-items-center gap-3">
+                <div class="navbar-brand-icon" style="width:44px; height:44px; font-size:1.2rem;">
+                  <i class="bi bi-mortarboard"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold text-dark mb-0" id="organizer-name">Organizer</h6>
+                  <div class="small text-muted" id="organizer-email">contact@college.com</div>
+                  <span id="organizer-verified-badge" class="badge bg-success bg-opacity-10 text-success small mt-1">
+                    <i class="bi bi-patch-check-fill me-1"></i>Verified Host
+                  </span>
+                </div>
+              </div>
+              <div class="border-top mt-3 pt-3 small text-muted">
+                <div><strong>Phone:</strong> <span id="organizer-phone">--</span></div>
+                <div><strong>Org Ref:</strong> <span id="organizer-reg">--</span></div>
+                <div id="event-budget-display" class="d-none mt-1"><strong>Allocated Budget:</strong> $<span id="event-budget">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Pass Ticket Modal -->
+  <div class="modal fade" id="qrPassModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="modal-ticket-header-title">Campus Digital Ticket</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <div class="qr-ticket-card mb-3">
+            <span class="badge bg-primary px-3 py-1 rounded-pill mb-2" id="modal-ticket-status-badge">OFFICIAL RSVP PASS</span>
+            <h5 class="fw-bold text-dark mb-1" id="modal-ticket-event-title">Event Title</h5>
+            <div class="text-muted small mb-3" id="modal-ticket-date-time">Date &bull; Time</div>
+
+            <div class="p-3 bg-light rounded-3 d-inline-block border mb-3">
+              <img id="modal-ticket-qr-img" src="" alt="QR Pass" class="img-fluid" style="width: 200px; height: 200px;">
+            </div>
+
+            <div class="small fw-mono text-dark fw-bold" id="modal-ticket-code">TICKET-CODE</div>
+            <div class="small text-muted mt-1">Attendee: <span id="modal-ticket-student-name" class="fw-bold">Student</span></div>
+            <div class="small text-muted mt-1">Status: <span id="modal-ticket-status-val" class="badge bg-success">registered</span></div>
+          </div>
+          <p class="small text-muted mb-0">Show this QR code at the event entrance for instant electronic check-in.</p>
+        </div>
+        <div class="modal-footer border-0 pt-0 d-flex flex-column gap-2">
+          <a id="modal-ticket-verify-btn" href="#" target="_blank" class="btn btn-outline-primary w-100 rounded-3">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Open Verification / Ticket Page
+          </a>
+          <button type="button" class="btn btn-secondary w-100 rounded-3" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Submission Modal -->
+  <div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom pb-3">
+          <h5 class="modal-title fw-bold">Rate & Review This Event</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="feedback-form">
+            <div class="mb-3 text-center">
+              <label class="form-label small fw-semibold text-muted d-block">Overall Rating (1 to 5 Stars)</label>
+              <div class="d-flex justify-content-center gap-2 fs-2" id="star-picker">
+                <i class="bi bi-star text-muted cursor-pointer" data-val="1"></i>
+                <i class="bi bi-star text-muted cursor-pointer" data-val="2"></i>
+                <i class="bi bi-star text-muted cursor-pointer" data-val="3"></i>
+                <i class="bi bi-star text-muted cursor-pointer" data-val="4"></i>
+                <i class="bi bi-star text-muted cursor-pointer" data-val="5"></i>
+              </div>
+              <input type="hidden" id="feedback-rating" value="5" required>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small">Event Quality</label>
+                <select id="fb-quality" class="form-select form-select-sm">
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Average</option>
+                  <option value="2">2 - Fair</option>
+                  <option value="1">1 - Poor</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Organization</label>
+                <select id="fb-org" class="form-select form-select-sm">
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Average</option>
+                  <option value="2">2 - Fair</option>
+                  <option value="1">1 - Poor</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Venue Suitability</label>
+                <select id="fb-venue" class="form-select form-select-sm">
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Average</option>
+                  <option value="2">2 - Fair</option>
+                  <option value="1">1 - Poor</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Content Relevance</label>
+                <select id="fb-content" class="form-select form-select-sm">
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Average</option>
+                  <option value="2">2 - Fair</option>
+                  <option value="1">1 - Poor</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="fb-comment" class="form-label small fw-semibold">Written Feedback (Max 1000 characters)</label>
+              <textarea id="fb-comment" class="form-control" rows="3" placeholder="Share your experience, highlights, and suggestions for organizers..." maxlength="1000"></textarea>
+            </div>
+
+            <button type="submit" id="submit-feedback-btn" class="btn btn-primary w-100 py-2 rounded-3 fw-bold">
+              Submit Review
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let currentEvent = null;
+    let studentRegistration = null;
+    let eventId = '';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      eventId = urlParams.get('id');
+
+      if (!eventId) {
+        document.getElementById('loading-spinner').classList.add('d-none');
+        const alertBox = document.getElementById('event-error-alert');
+        alertBox.innerText = 'No event ID specified in the URL.';
+        alertBox.classList.remove('d-none');
+        return;
+      }
+
+      await loadEventDetails();
+      await checkUserRegistrationStatus();
+      await loadEventFeedback();
+      setupActionHandlers();
+      setupFeedbackStarPicker();
+    });
+
+    async function loadEventDetails() {
+      try {
+        const res = await api.get(`/api/events/${eventId}`);
+        if (!res.success || !res.data) {
+          throw new Error('Event not found or failed to load');
+        }
+
+        currentEvent = res.data;
+        document.getElementById('loading-spinner').classList.add('d-none');
+        document.getElementById('event-container').classList.remove('d-none');
+
+        // Populate details
+        document.title = `${currentEvent.title} | College Event Hub`;
+        document.getElementById('breadcrumb-title').innerText = currentEvent.title;
+        document.getElementById('event-title').innerText = currentEvent.title;
+        document.getElementById('event-description').innerText = currentEvent.description;
+        document.getElementById('event-views').innerText = currentEvent.views || 0;
+
+        // Poster
+        const poster = currentEvent.posterImage || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
+        document.getElementById('event-poster').src = poster;
+
+        // Badges
+        document.getElementById('event-category-badge').innerHTML = Utils.getCategoryBadge(currentEvent.category);
+        document.getElementById('event-status-badge').innerHTML = Utils.getStatusBadge(currentEvent.status);
+
+        // Date & Time
+        document.getElementById('event-date').innerText = Utils.formatDate(currentEvent.startDate);
+        document.getElementById('event-time').innerText = `${Utils.formatTime(currentEvent.startTime)} - ${Utils.formatTime(currentEvent.endTime)}`;
+
+        // Rating summary
+        const rating = currentEvent.averageRating || 0;
+        document.getElementById('event-rating-summary').innerHTML = Utils.renderStarRating(rating);
+
+        // Venue
+        if (currentEvent.venue) {
+          document.getElementById('venue-name').innerText = currentEvent.venue.name;
+          document.getElementById('venue-location').innerText = currentEvent.venue.location;
+          document.getElementById('venue-capacity').innerText = `${currentEvent.venue.capacity} persons`;
+          document.getElementById('venue-status').innerText = currentEvent.venue.availability || 'Available';
+
+          const amenitiesContainer = document.getElementById('venue-amenities');
+          if (currentEvent.venue.amenities && currentEvent.venue.amenities.length > 0) {
+            amenitiesContainer.innerHTML = currentEvent.venue.amenities.map(a => `
+              <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-check2 me-1 text-success"></i>${Utils.escapeHtml(a)}</span>
+            `).join('');
+          } else {
+            amenitiesContainer.innerHTML = '<span class="text-muted small">Standard campus facilities</span>';
+          }
+        }
+
+        // Capacity bar
+        const cap = currentEvent.capacity;
+        const reg = currentEvent.registeredCount || 0;
+        const avail = (currentEvent.availableSeats !== undefined) ? currentEvent.availableSeats : Math.max(0, cap - reg);
+        document.getElementById('seats-available-counter').innerText = avail > 0 ? `${avail} seats` : 'Full (Waitlist)';
+        document.getElementById('seats-registered').innerText = reg;
+        document.getElementById('seats-total').innerText = cap;
+
+        const capPct = Math.min(100, Math.round((reg / cap) * 100));
+        const pBar = document.getElementById('capacity-progress-bar');
+        pBar.style.width = `${capPct}%`;
+        if (capPct >= 90) pBar.className = 'progress-bar bg-danger';
+
+        // Host info
+        if (currentEvent.organizer) {
+          document.getElementById('organizer-name').innerText = currentEvent.organizer.name;
+          document.getElementById('organizer-email').innerText = currentEvent.organizer.email;
+          document.getElementById('organizer-phone').innerText = currentEvent.organizer.phone || 'N/A';
+          document.getElementById('organizer-reg').innerText = currentEvent.organizer.organizationNumber || 'Campus Organization';
+
+          if (!currentEvent.organizer.isVerified) {
+            document.getElementById('organizer-verified-badge').className = 'badge bg-warning bg-opacity-10 text-warning small mt-1';
+            document.getElementById('organizer-verified-badge').innerHTML = '<i class="bi bi-clock-history me-1"></i>Verification Pending';
+          }
+        }
+
+        // Workflow Alert Banner
+        const banner = document.getElementById('event-workflow-banner');
+        if (banner) {
+          if (currentEvent.status === 'pending') {
+            banner.className = 'alert alert-warning mb-4 rounded-3 d-flex align-items-center gap-3 border-warning';
+            banner.innerHTML = `
+              <i class="bi bi-clock-history fs-3 text-warning"></i>
+              <div>
+                <h6 class="fw-bold mb-1">Awaiting Administrative Approval</h6>
+                <p class="small mb-0">This event proposal is currently in <strong>Pending</strong> status. It will only become visible to students in campus catalogues once approved by an administrator.</p>
+              </div>
+            `;
+            banner.classList.remove('d-none');
+          } else if (currentEvent.status === 'rejected') {
+            banner.className = 'alert alert-danger mb-4 rounded-3 d-flex align-items-center gap-3 border-danger';
+            banner.innerHTML = `
+              <i class="bi bi-x-circle fs-3 text-danger"></i>
+              <div>
+                <h6 class="fw-bold mb-1">Event Proposal Rejected</h6>
+                <p class="small mb-0">This event proposal was rejected by administration.${currentEvent.rejectionReason ? ` Reason: <strong>${Utils.escapeHtml(currentEvent.rejectionReason)}</strong>` : ''}</p>
+              </div>
+            `;
+            banner.classList.remove('d-none');
+          } else if (currentEvent.status === 'cancelled') {
+            banner.className = 'alert alert-danger mb-4 rounded-3 d-flex align-items-center gap-3 border-danger';
+            banner.innerHTML = `
+              <i class="bi bi-exclamation-triangle-fill fs-3 text-danger"></i>
+              <div>
+                <h6 class="fw-bold mb-1">This event has been cancelled</h6>
+                <p class="small mb-0">This event was cancelled by administration or the organizer.${currentEvent.cancellationReason ? ` Reason: <strong>${Utils.escapeHtml(currentEvent.cancellationReason)}</strong>` : ''}</p>
+              </div>
+            `;
+            banner.classList.remove('d-none');
+          } else {
+            banner.classList.add('d-none');
+          }
+        }
+
+        // Disable RSVP if not approved / published or if cancelled
+        const rsvpContainer = document.getElementById('student-rsvp-actions');
+        if (rsvpContainer && !['published', 'approved'].includes(currentEvent.status)) {
+          const disabledMsg = currentEvent.status === 'cancelled'
+            ? 'This event has been cancelled.'
+            : `Registration unavailable (${currentEvent.status.toUpperCase()} event)`;
+          rsvpContainer.innerHTML = `
+            <div class="alert alert-danger text-center small py-2 mb-0 rounded-3">
+              <i class="bi bi-x-circle me-1"></i> ${disabledMsg}
+            </div>
+          `;
+        }
+
+        // Role controls visibility
+        setupRoleControls();
+      } catch (error) {
+        document.getElementById('loading-spinner').classList.add('d-none');
+        const alertBox = document.getElementById('event-error-alert');
+        alertBox.innerText = error.message;
+        alertBox.classList.remove('d-none');
+      }
+    }
+
+    function setupRoleControls() {
+      if (!Auth.isLoggedIn() || !currentEvent) return;
+      const user = Auth.getCurrentUser();
+
+      // Show budget to organizer or admin
+      if (user.role === 'admin' || (user.role === 'organizer' && currentEvent.organizer && currentEvent.organizer._id === user._id)) {
+        document.getElementById('event-budget-display').classList.remove('d-none');
+        document.getElementById('event-budget').innerText = currentEvent.budget || 0;
+      }
+
+      // Organizer Controls (only for the creator organizer)
+      if (user.role === 'organizer' && currentEvent.organizer && currentEvent.organizer._id === user._id) {
+        document.getElementById('organizer-actions-box').classList.remove('d-none');
+        document.getElementById('edit-event-link').href = `/edit-event.html?id=${currentEvent._id}`;
+        document.getElementById('manage-attendees-link').href = `/organizer-dashboard.html?eventId=${currentEvent._id}`;
+      }
+
+      // Admin Controls
+      if (user.role === 'admin') {
+        document.getElementById('admin-actions-box').classList.remove('d-none');
+        document.getElementById('organizer-actions-box').classList.remove('d-none');
+        document.getElementById('edit-event-link').href = `/edit-event.html?id=${currentEvent._id}`;
+        document.getElementById('manage-attendees-link').href = `/organizer-dashboard.html?eventId=${currentEvent._id}`;
+      }
+    }
+
+    async function checkUserRegistrationStatus() {
+      if (!Auth.isLoggedIn()) return;
+      const user = Auth.getCurrentUser();
+      if (user.role !== 'student') return;
+
+      try {
+        const res = await api.get('/api/registrations', { event: eventId });
+        if (res.success && res.data && res.data.registrations && res.data.registrations.length > 0) {
+          studentRegistration = res.data.registrations[0];
+          if (['registered', 'checked-in', 'waitlisted'].includes(studentRegistration.status)) {
+            document.getElementById('student-rsvp-actions')?.classList.add('d-none');
+            const regBox = document.getElementById('registered-badge-box');
+            regBox?.classList.remove('d-none');
+
+            if (studentRegistration.status === 'checked-in') {
+              regBox.className = 'p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 mb-3 text-center';
+              regBox.querySelector('.fw-bold').innerHTML = '<i class="bi bi-patch-check-fill me-1"></i> Checked-In & Attended';
+            } else if (studentRegistration.status === 'waitlisted') {
+              regBox.className = 'p-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 mb-3 text-center';
+              regBox.querySelector('.fw-bold').className = 'fw-bold text-warning mb-1';
+              regBox.querySelector('.fw-bold').innerHTML = '<i class="bi bi-hourglass-split me-1"></i> On Waitlist';
+            } else {
+              regBox.className = 'p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 mb-3 text-center';
+              regBox.querySelector('.fw-bold').className = 'fw-bold text-success mb-1';
+              regBox.querySelector('.fw-bold').innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> You are Registered!';
+            }
+          } else {
+            studentRegistration = null;
+            document.getElementById('student-rsvp-actions')?.classList.remove('d-none');
+            document.getElementById('registered-badge-box')?.classList.add('d-none');
+          }
+        } else {
+          studentRegistration = null;
+          document.getElementById('student-rsvp-actions')?.classList.remove('d-none');
+          document.getElementById('registered-badge-box')?.classList.add('d-none');
+        }
+      } catch (e) {
+        console.warn('Registration check failed:', e.message);
+      }
+    }
+
+    async function loadEventFeedback() {
+      try {
+        const res = await api.get('/api/feedback', { event: eventId });
+        if (res.success && res.data) {
+          const { feedbacks, stats } = res.data;
+          const container = document.getElementById('reviews-list-container');
+          document.getElementById('reviews-count-text').innerText = `${feedbacks.length} review${feedbacks.length === 1 ? '' : 's'} submitted`;
+
+          if (feedbacks.length === 0) {
+            container.innerHTML = '<div class="text-muted small py-3">No attendee reviews submitted yet. Be the first to review after attending!</div>';
+            return;
+          }
+
+          container.innerHTML = feedbacks.map(fb => {
+            const studentName = fb.student?.name || 'Anonymous Student';
+            const initials = studentName.charAt(0).toUpperCase();
+
+            let organizerResponseHtml = '';
+            if (fb.organizerResponse) {
+              organizerResponseHtml = `
+                <div class="mt-2 p-3 bg-light rounded-3 border-start border-primary border-3">
+                  <div class="small fw-bold text-dark"><i class="bi bi-reply-fill me-1 text-primary"></i>Organizer Response:</div>
+                  <div class="small text-secondary mt-1">${Utils.escapeHtml(fb.organizerResponse)}</div>
+                </div>
+              `;
+            }
+
+            return `
+              <div class="p-3 bg-light bg-opacity-50 rounded-3 border">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="user-nav-avatar bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width:30px; height:30px; font-size:0.75rem;">
+                      ${initials}
+                    </div>
+                    <div>
+                      <div class="fw-bold small text-dark">${Utils.escapeHtml(studentName)}</div>
+                      <div class="text-muted" style="font-size:0.75rem;">${Utils.formatDate(fb.createdAt)}</div>
+                    </div>
+                  </div>
+                  <div>
+                    ${Utils.renderStarRating(fb.rating)}
+                  </div>
+                </div>
+                <p class="small text-dark mb-1">${Utils.escapeHtml(fb.comment || 'No comment provided.')}</p>
+                <div class="d-flex flex-wrap gap-2 text-muted" style="font-size:0.75rem;">
+                  <span>Quality: ${fb.qualityRating}/5</span> &bull;
+                  <span>Org: ${fb.organizationRating}/5</span> &bull;
+                  <span>Venue: ${fb.venueRating}/5</span>
+                </div>
+                ${organizerResponseHtml}
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) {
+        console.warn('Feedback load error:', e.message);
+      }
+    }
+
+    function setupActionHandlers() {
+      // Student RSVP button
+      const rsvpBtn = document.getElementById('rsvp-now-btn');
+      rsvpBtn.addEventListener('click', async () => {
+        if (!Auth.isLoggedIn()) {
+          window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          return;
+        }
+
+        const user = Auth.getCurrentUser();
+        if (user.role !== 'student') {
+          Utils.showToast('Only students can RSVP for event admission.', 'warning');
+          return;
+        }
+
+        rsvpBtn.disabled = true;
+        rsvpBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming RSVP...';
+
+        try {
+          const res = await api.post('/api/registrations', { eventId });
+          if (res.success && res.data) {
+            studentRegistration = res.data;
+            Utils.showToast('Registration Successful', 'success');
+            await loadEventDetails();
+            await checkUserRegistrationStatus();
+
+            // Display "Registration Successful" modal with ticket ID, QR code, and details
+            showTicketModal('Registration Successful');
+          }
+        } catch (error) {
+          Utils.showToast(error.message, 'error');
+          rsvpBtn.disabled = false;
+          rsvpBtn.innerHTML = '<i class="bi bi-ticket-perforated fs-5"></i><span>Register for Event (RSVP)</span>';
+        }
+      });
+
+      function showTicketModal(headerTitle = 'Campus Digital Ticket') {
+        if (!studentRegistration) return;
+        const user = Auth.getCurrentUser();
+
+        document.getElementById('modal-ticket-header-title').innerText = headerTitle;
+        const statusBadge = document.getElementById('modal-ticket-status-badge');
+        if (headerTitle === 'Registration Successful') {
+          statusBadge.className = 'badge bg-success px-3 py-1 rounded-pill mb-2';
+          statusBadge.innerText = 'REGISTRATION SUCCESSFUL';
+        } else {
+          statusBadge.className = 'badge bg-primary px-3 py-1 rounded-pill mb-2';
+          statusBadge.innerText = 'OFFICIAL RSVP PASS';
+        }
+
+        document.getElementById('modal-ticket-event-title').innerText = currentEvent.title;
+        document.getElementById('modal-ticket-date-time').innerText = `${Utils.formatDate(currentEvent.startDate)} at ${Utils.formatTime(currentEvent.startTime)}`;
+        document.getElementById('modal-ticket-code').innerText = studentRegistration.qrCode;
+        document.getElementById('modal-ticket-student-name').innerText = user.name;
+        document.getElementById('modal-ticket-status-val').innerText = studentRegistration.status || 'registered';
+
+        const verifyBtn = document.getElementById('modal-ticket-verify-btn');
+        if (verifyBtn) {
+          verifyBtn.href = `/verify-ticket.html?ticket=${encodeURIComponent(studentRegistration.qrCode)}`;
+        }
+
+        const qrImg = document.getElementById('modal-ticket-qr-img');
+        if (studentRegistration.qrCodeDataUrl) {
+          qrImg.src = studentRegistration.qrCodeDataUrl;
+        } else {
+          // Generate client side QR Code pointing to reachable verification URL
+          const verifyUrl = `${window.location.origin}/verify-ticket.html?ticket=${encodeURIComponent(studentRegistration.qrCode)}`;
+          try {
+            QRCode.toDataURL(verifyUrl, { width: 250, margin: 2 }).then(dataUrl => { qrImg.src = dataUrl; });
+          } catch (e) {
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+          }
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('qrPassModal'));
+        modal.show();
+      }
+
+      // View QR Pass Modal button
+      document.getElementById('view-qr-pass-btn').addEventListener('click', () => {
+        showTicketModal('Official Admission Pass');
+      });
+
+      // Cancel RSVP
+      document.getElementById('cancel-rsvp-btn').addEventListener('click', async () => {
+        if (!studentRegistration) return;
+        if (!confirm('Are you sure you want to cancel your event registration? Your spot will be released to the waitlist.')) return;
+
+        try {
+          const res = await api.delete(`/api/registrations/${studentRegistration._id}`);
+          if (res.success) {
+            Utils.showToast('Registration cancelled.', 'info');
+            studentRegistration = null;
+            document.getElementById('registered-badge-box').classList.add('d-none');
+            document.getElementById('student-rsvp-actions').classList.remove('d-none');
+            await loadEventDetails();
+          }
+        } catch (error) {
+          Utils.showToast(error.message, 'error');
+        }
+      });
+
+      // Leave feedback button
+      document.getElementById('leave-feedback-btn').addEventListener('click', () => {
+        if (!Auth.isLoggedIn()) {
+          window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          return;
+        }
+        const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+        modal.show();
+      });
+
+      // Feedback form submission
+      document.getElementById('feedback-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rating = document.getElementById('feedback-rating').value;
+        const qualityRating = document.getElementById('fb-quality').value;
+        const organizationRating = document.getElementById('fb-org').value;
+        const venueRating = document.getElementById('fb-venue').value;
+        const contentRelevanceRating = document.getElementById('fb-content').value;
+        const comment = document.getElementById('fb-comment').value.trim();
+
+        const submitBtn = document.getElementById('submit-feedback-btn');
+        submitBtn.disabled = true;
+
+        try {
+          const res = await api.post('/api/feedback', {
+            eventId,
+            rating,
+            qualityRating,
+            organizationRating,
+            venueRating,
+            contentRelevanceRating,
+            comment,
+          });
+
+          if (res.success) {
+            Utils.showToast('Thank you for rating this event!', 'success');
+            const modalEl = document.getElementById('feedbackModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            await loadEventFeedback();
+          }
+        } catch (error) {
+          Utils.showToast(error.message, 'error');
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Admin Actions
+      document.getElementById('admin-approve-btn').addEventListener('click', async () => {
+        if (!confirm('Approve and publish this event to the campus community?')) return;
+        try {
+          const res = await api.put(`/api/events/${eventId}/status`, { status: 'approved' });
+          if (res.success) {
+            Utils.showToast('Event approved and made live!', 'success');
+            await loadEventDetails();
+          }
+        } catch (err) {
+          Utils.showToast(err.message, 'error');
+        }
+      });
+
+      document.getElementById('admin-reject-btn').addEventListener('click', async () => {
+        const reason = prompt('Please enter rejection reason for the organizer:');
+        if (reason === null) return;
+        try {
+          const res = await api.put(`/api/events/${eventId}/status`, { status: 'rejected', rejectionReason: reason });
+          if (res.success) {
+            Utils.showToast('Event marked as rejected.', 'warning');
+            await loadEventDetails();
+          }
+        } catch (err) {
+          Utils.showToast(err.message, 'error');
+        }
+      });
+
+      // Admin Cancel Event (Soft delete, keep in DB, hidden from listings)
+      const adminCancelBtn = document.getElementById('admin-cancel-btn');
+      if (adminCancelBtn) {
+        adminCancelBtn.addEventListener('click', async () => {
+          const reason = prompt('Specify cancellation reason:') || 'Cancelled by administrator';
+          if (!confirm('Cancel this event? It will be marked as cancelled and hidden from active listings.')) return;
+          try {
+            const res = await api.delete(`/api/events/${eventId}?action=cancel&reason=${encodeURIComponent(reason)}`);
+            if (res.success) {
+              Utils.showToast('Event successfully cancelled and hidden from listings.', 'info');
+              await loadEventDetails();
+            }
+          } catch (err) {
+            Utils.showToast(err.message, 'error');
+          }
+        });
+      }
+
+      // Admin Archive / Delete Event (Permanently delete from MongoDB)
+      document.getElementById('admin-delete-btn').addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to archive this event? Archiving will permanently DELETE the event from MongoDB database.')) return;
+        try {
+          const res = await api.delete(`/api/events/${eventId}?action=archive`);
+          if (res.success) {
+            Utils.showToast('Event archived and permanently deleted from MongoDB.', 'success');
+            setTimeout(() => { window.location.href = '/admin-dashboard.html'; }, 1000);
+          }
+        } catch (err) {
+          Utils.showToast(err.message, 'error');
+        }
+      });
+
+      // Organizer Cancel Event (Soft delete, keep in DB, hidden from listings)
+      const cancelEventBtn = document.getElementById('cancel-event-btn');
+      if (cancelEventBtn) {
+        cancelEventBtn.addEventListener('click', async () => {
+          const reason = prompt('Specify cancellation reason for registered students:') || 'Cancelled by organizer';
+          if (!confirm('Cancel this event? Registered students will receive cancellation notifications and the event will be hidden from listings.')) return;
+          try {
+            const res = await api.delete(`/api/events/${eventId}?action=cancel&reason=${encodeURIComponent(reason)}`);
+            if (res.success) {
+              Utils.showToast('Event successfully cancelled and hidden from listings.', 'info');
+              await loadEventDetails();
+            }
+          } catch (err) {
+            Utils.showToast(err.message, 'error');
+          }
+        });
+      }
+
+      // Organizer Archive Event (Permanently delete from MongoDB)
+      document.getElementById('archive-event-btn').addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to archive this event? Archiving will permanently DELETE the event from MongoDB database.')) return;
+        try {
+          const res = await api.delete(`/api/events/${eventId}?action=archive`);
+          if (res.success) {
+            Utils.showToast('Event archived and permanently deleted from MongoDB.', 'success');
+            setTimeout(() => { window.location.href = '/organizer-dashboard.html'; }, 1000);
+          }
+        } catch (err) {
+          Utils.showToast(err.message, 'error');
+        }
+      });
+
+      // Reschedule event by Organizer
+      document.getElementById('reschedule-event-btn').addEventListener('click', () => {
+        window.location.href = `/edit-event.html?id=${eventId}&reschedule=true`;
+      });
+    }
+
+    function setupFeedbackStarPicker() {
+      const picker = document.getElementById('star-picker');
+      const stars = picker.querySelectorAll('i');
+      const hiddenInput = document.getElementById('feedback-rating');
+
+      const setStars = (val) => {
+        stars.forEach(s => {
+          const sVal = Number(s.getAttribute('data-val'));
+          if (sVal <= val) {
+            s.className = 'bi bi-star-fill text-warning cursor-pointer';
+          } else {
+            s.className = 'bi bi-star text-muted cursor-pointer';
+          }
+        });
+        hiddenInput.value = val;
+      };
+
+      setStars(5);
+
+      stars.forEach(s => {
+        s.addEventListener('click', () => {
+          setStars(Number(s.getAttribute('data-val')));
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Events | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <!-- Header Section -->
+  <section class="py-4 bg-white border-bottom">
+    <div class="container-xl">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <h2 class="fw-bold text-dark mb-1">Campus Events Directory</h2>
+          <p class="text-muted small mb-0">Browse scheduled workshops, cultural fests, academic symposiums, and sports tourneys.</p>
+        </div>
+        <div id="header-create-event-btn" class="d-none">
+          <a href="/create-event.html" class="btn btn-primary rounded-pill px-4">
+            <i class="bi bi-plus-lg me-1"></i> Create New Event
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="container-xl py-4">
+    <div class="filter-bar">
+      <div class="row g-3 align-items-end">
+        <!-- Search Query -->
+        <div class="col-lg-4 col-md-6">
+          <label class="form-label small fw-semibold text-muted">Search Keyword</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="filter-search" class="form-control" placeholder="Search by title, topic, or keyword...">
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="col-lg-2 col-md-3 col-6">
+          <label class="form-label small fw-semibold text-muted">Category</label>
+          <select id="filter-category" class="form-select">
+            <option value="all">All Categories</option>
+            <option value="Academic">Academic</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Sports">Sports</option>
+            <option value="Social">Social</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Seminar">Seminar</option>
+          </select>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="col-lg-2 col-md-3 col-6">
+          <label class="form-label small fw-semibold text-muted">Date Filter</label>
+          <select id="filter-date" class="form-select">
+            <option value="upcoming">Upcoming</option>
+            <option value="today">Today</option>
+            <option value="this-week">This Week</option>
+            <option value="this-month">This Month</option>
+            <option value="all">Any Date</option>
+          </select>
+        </div>
+
+        <!-- Venue Selection -->
+        <div class="col-lg-2 col-md-6 col-6">
+          <label class="form-label small fw-semibold text-muted">Venue</label>
+          <select id="filter-venue" class="form-select">
+            <option value="all">All Venues</option>
+          </select>
+        </div>
+
+        <!-- Availability Toggle & Filter Button -->
+        <div class="col-lg-2 col-md-6 col-6 d-flex gap-2">
+          <button id="apply-filters-btn" class="btn btn-primary w-100 fw-bold">
+            <i class="bi bi-funnel me-1"></i> Apply
+          </button>
+          <button id="reset-filters-btn" class="btn btn-outline-secondary" title="Reset Filters">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Toggles -->
+      <div class="d-flex flex-wrap align-items-center justify-content-between mt-3 pt-3 border-top gap-2">
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" role="switch" id="filter-availability">
+          <label class="form-check-label small fw-semibold text-dark" for="filter-availability">
+            Show only events with available seats
+          </label>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <span class="small text-muted">Sort By:</span>
+          <select id="filter-sort" class="form-select form-select-sm" style="width: auto;">
+            <option value="startDate-asc">Date (Earliest First)</option>
+            <option value="startDate-desc">Date (Latest First)</option>
+            <option value="title-asc">Title (A-Z)</option>
+            <option value="registeredCount-desc">Most Popular</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Events Count Header -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div id="events-count-label" class="small text-muted fw-semibold">Loading events...</div>
+    </div>
+
+    <!-- Events Grid -->
+    <div id="events-grid-container" class="row g-4">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Loading events catalogue...</p>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-5 mb-3" id="pagination-container"></div>
+  </div>
+
+  <div id="footer-container"></div>
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let currentPage = 1;
+    const limit = 9;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check if organizer or admin to show create button
+      if (Auth.isLoggedIn()) {
+        const user = Auth.getCurrentUser();
+        if (user.role === 'organizer' || user.role === 'admin') {
+          document.getElementById('header-create-event-btn').classList.remove('d-none');
+        }
+      }
+
+      await loadVenuesList();
+
+      // Read query params from URL if any
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('category')) {
+        document.getElementById('filter-category').value = urlParams.get('category');
+      }
+      if (urlParams.get('search')) {
+        document.getElementById('filter-search').value = urlParams.get('search');
+      }
+      if (urlParams.get('date')) {
+        document.getElementById('filter-date').value = urlParams.get('date');
+      }
+
+      fetchEvents();
+
+      // Filter event handlers
+      document.getElementById('apply-filters-btn').addEventListener('click', () => {
+        currentPage = 1;
+        fetchEvents();
+      });
+
+      document.getElementById('reset-filters-btn').addEventListener('click', () => {
+        document.getElementById('filter-search').value = '';
+        document.getElementById('filter-category').value = 'all';
+        document.getElementById('filter-date').value = 'upcoming';
+        document.getElementById('filter-venue').value = 'all';
+        document.getElementById('filter-availability').checked = false;
+        document.getElementById('filter-sort').value = 'startDate-asc';
+        currentPage = 1;
+        fetchEvents();
+      });
+
+      document.getElementById('filter-availability').addEventListener('change', () => {
+        currentPage = 1;
+        fetchEvents();
+      });
+
+      document.getElementById('filter-sort').addEventListener('change', () => {
+        currentPage = 1;
+        fetchEvents();
+      });
+
+      document.getElementById('filter-search').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          currentPage = 1;
+          fetchEvents();
+        }
+      });
+    });
+
+    async function loadVenuesList() {
+      try {
+        const res = await api.get('/api/venues');
+        if (res.success && res.data) {
+          const select = document.getElementById('filter-venue');
+          res.data.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v._id;
+            opt.textContent = `${v.name} (Cap: ${v.capacity})`;
+            select.appendChild(opt);
+          });
+        }
+      } catch (e) {
+        console.warn('Venues fetch error:', e.message);
+      }
+    }
+
+    async function fetchEvents() {
+      const grid = document.getElementById('events-grid-container');
+      const countLabel = document.getElementById('events-count-label');
+      grid.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Searching events...</p>
+        </div>
+      `;
+
+      const search = document.getElementById('filter-search').value.trim();
+      const category = document.getElementById('filter-category').value;
+      const date = document.getElementById('filter-date').value;
+      const venue = document.getElementById('filter-venue').value;
+      const availability = document.getElementById('filter-availability').checked ? 'available' : '';
+
+      const [sortBy, sortOrder] = document.getElementById('filter-sort').value.split('-');
+
+      const params = {
+        search,
+        category: category !== 'all' ? category : '',
+        date: date !== 'all' ? date : '',
+        venue: venue !== 'all' ? venue : '',
+        availability,
+        sortBy,
+        sortOrder,
+        page: currentPage,
+        limit,
+      };
+
+      try {
+        const res = await api.get('/api/events', params);
+        if (!res.success || !res.data) {
+          grid.innerHTML = '<div class="col-12 alert alert-danger">Error retrieving events.</div>';
+          return;
+        }
+
+        const { events, total, pages } = res.data;
+        countLabel.innerHTML = `Found <strong class="text-dark">${total}</strong> event${total === 1 ? '' : 's'}`;
+
+        if (events.length === 0) {
+          grid.innerHTML = `
+            <div class="col-12 text-center py-5">
+              <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+              <h5 class="fw-bold">No Events Match Your Search</h5>
+              <p class="text-muted">Try relaxing your search keywords or resetting your filter criteria.</p>
+              <button class="btn btn-outline-primary btn-sm rounded-pill mt-2" onclick="document.getElementById('reset-filters-btn').click()">
+                Reset Filters
+              </button>
+            </div>
+          `;
+          document.getElementById('pagination-container').innerHTML = '';
+          return;
+        }
+
+        grid.innerHTML = events.map(event => {
+          const startDate = new Date(event.startDate);
+          const monthShort = startDate.toLocaleString('en-US', { month: 'short' });
+          const dayNumber = startDate.getDate();
+          const poster = event.posterImage || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80';
+          const seatsLeft = (event.availableSeats !== undefined) ? event.availableSeats : Math.max(0, event.capacity - (event.registeredCount || 0));
+          const capacityPercent = Math.min(100, Math.round(((event.registeredCount || 0) / event.capacity) * 100));
+
+          return `
+            <div class="col-lg-4 col-md-6">
+              <div class="event-card">
+                <div class="event-poster-wrapper">
+                  <img src="${poster}" alt="${Utils.escapeHtml(event.title)}" class="event-poster" onerror="this.src='https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80'">
+                  <div class="event-date-badge">
+                    <div class="event-date-day">${dayNumber}</div>
+                    <div>${monthShort}</div>
+                  </div>
+                </div>
+                <div class="event-body">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    ${Utils.getCategoryBadge(event.category)}
+                    <span class="badge ${seatsLeft > 0 ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning'} small">
+                      ${seatsLeft > 0 ? `${seatsLeft} seats left` : 'Waitlist Only'}
+                    </span>
+                  </div>
+
+                  <h5 class="fw-bold text-dark mb-2">
+                    <a href="/event-details.html?id=${event._id}" class="text-dark text-decoration-none">
+                      ${Utils.escapeHtml(event.title)}
+                    </a>
+                  </h5>
+
+                  <p class="text-muted small mb-3 text-truncate-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 38px;">
+                    ${Utils.escapeHtml(event.description)}
+                  </p>
+
+                  <div class="event-meta">
+                    <span><i class="bi bi-clock me-1 text-primary"></i> ${Utils.formatTime(event.startTime)} - ${Utils.formatTime(event.endTime)}</span>
+                  </div>
+                  <div class="event-meta">
+                    <span class="text-truncate"><i class="bi bi-geo-alt me-1 text-danger"></i> ${Utils.escapeHtml(event.venue?.name || 'Campus Venue')}</span>
+                  </div>
+
+                  <!-- Registration Capacity Bar -->
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                      <span>Capacity: ${event.registeredCount || 0}/${event.capacity}</span>
+                      <span>${capacityPercent}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                      <div class="progress-bar ${capacityPercent >= 90 ? 'bg-danger' : 'bg-primary'}" role="progressbar" style="width: ${capacityPercent}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="event-footer">
+                    <div class="small text-muted">
+                      By <span class="fw-semibold text-dark">${Utils.escapeHtml(event.organizer?.name || 'Organizer')}</span>
+                    </div>
+                    <a href="/event-details.html?id=${event._id}" class="btn btn-sm btn-primary rounded-pill px-3">
+                      View Details
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        renderPagination(pages, currentPage);
+      } catch (error) {
+        grid.innerHTML = `<div class="col-12 alert alert-danger">${error.message}</div>`;
+      }
+    }
+
+    function renderPagination(totalPages, activePage) {
+      const container = document.getElementById('pagination-container');
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = '<ul class="pagination shadow-sm">';
+      html += `
+        <li class="page-item ${activePage === 1 ? 'disabled' : ''}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage(${activePage - 1})">&laquo;</a>
+        </li>
+      `;
+
+      for (let p = 1; p <= totalPages; p++) {
+        html += `
+          <li class="page-item ${p === activePage ? 'active' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage(${p})">${p}</a>
+          </li>
+        `;
+      }
+
+      html += `
+        <li class="page-item ${activePage === totalPages ? 'disabled' : ''}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage(${activePage + 1})">&raquo;</a>
+        </li>
+      `;
+      html += '</ul>';
+
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      fetchEvents();
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

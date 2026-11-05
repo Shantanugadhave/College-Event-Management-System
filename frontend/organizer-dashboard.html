@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Console | College Event Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+      <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+        <div class="user-nav-avatar bg-success text-white d-flex align-items-center justify-content-center fw-bold fs-5" id="sidebar-avatar">
+          O
+        </div>
+        <div>
+          <h6 class="fw-bold text-dark mb-0" id="sidebar-org-name">Organizer</h6>
+          <span class="badge bg-primary small" id="sidebar-org-status">Organizer Portal</span>
+        </div>
+      </div>
+
+      <div class="sidebar-heading">Management</div>
+      <a href="/organizer-dashboard.html" class="sidebar-nav-item active">
+        <i class="bi bi-speedometer2"></i> Dashboard Overview
+      </a>
+      <a href="/create-event.html" class="sidebar-nav-item">
+        <i class="bi bi-plus-circle"></i> Create New Event
+      </a>
+      <a href="/my-events.html" class="sidebar-nav-item">
+        <i class="bi bi-calendar4-week"></i> My Events Catalog
+      </a>
+      <a href="/venues.html" class="sidebar-nav-item">
+        <i class="bi bi-building"></i> Campus Venues
+      </a>
+      <a href="/reports.html" class="sidebar-nav-item">
+        <i class="bi bi-graph-up"></i> Event Analytics
+      </a>
+      <a href="/feedback.html" class="sidebar-nav-item">
+        <i class="bi bi-chat-quote"></i> Student Feedback
+      </a>
+      <a href="/notifications.html" class="sidebar-nav-item">
+        <i class="bi bi-bell"></i> Notifications
+      </a>
+
+      <div class="mt-auto pt-3 border-top">
+        <a href="javascript:void(0)" onclick="Auth.logout()" class="sidebar-nav-item text-danger">
+          <i class="bi bi-box-arrow-right"></i> Sign Out
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+      <!-- Top Bar -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold text-dark mb-1">Organizer Operations Center</h2>
+          <p class="text-muted small mb-0">Coordinate campus events, monitor registration capacities, and perform attendee check-ins.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/create-event.html" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Create Event
+          </a>
+          <button id="refresh-dashboard-btn" class="btn btn-outline-secondary rounded-pill px-3" title="Refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Verification Alert Banner if unverified -->
+      <div id="unverified-banner" class="alert alert-warning d-none rounded-4 p-3 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-start gap-3">
+          <i class="bi bi-shield-exclamation fs-3 text-warning"></i>
+          <div>
+            <h6 class="fw-bold mb-1">Organizer Verification Pending</h6>
+            <p class="small mb-0">
+              Your organization account is currently undergoing verification by campus administration. You can draft events, but publishing them requires admin verification.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Metrics Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Events</div>
+              <div class="stat-value text-dark" id="stat-total-events">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-primary">
+              <i class="bi bi-calendar3"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Upcoming</div>
+              <div class="stat-value text-primary" id="stat-upcoming-events">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-info">
+              <i class="bi bi-hourglass-top"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Registrations</div>
+              <div class="stat-value text-success" id="stat-total-regs">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-success">
+              <i class="bi bi-ticket-perforated"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Attended</div>
+              <div class="stat-value text-dark" id="stat-total-attended">0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-purple">
+              <i class="bi bi-person-check-fill"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Attendance Rate</div>
+              <div class="stat-value text-primary" id="stat-attendance-rate">0%</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-primary">
+              <i class="bi bi-graph-up-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Avg. Rating</div>
+              <div class="stat-value text-warning" id="stat-avg-rating">0.0</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-warning">
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Check-in Terminal Section -->
+      <div class="card border rounded-4 shadow-sm bg-white p-4 mb-4">
+        <div class="row align-items-center g-3">
+          <div class="col-md-6">
+            <h5 class="fw-bold text-dark mb-1"><i class="bi bi-qr-code-scan me-2 text-primary"></i>Rapid QR Check-in Terminal</h5>
+            <p class="text-muted small mb-0">Type or scan attendee QR ticket string to mark attendance instantly.</p>
+          </div>
+          <div class="col-md-6">
+            <form id="check-in-form" class="d-flex gap-2">
+              <input type="text" id="check-in-input" class="form-control fw-mono" placeholder="Enter QR ticket code (e.g. EVENT-xxx-xxx)" required>
+              <button type="submit" id="check-in-submit-btn" class="btn btn-success fw-bold px-4 flex-shrink-0">
+                <i class="bi bi-check2-circle me-1"></i> Check-in
+              </button>
+            </form>
+          </div>
+        </div>
+        <div id="check-in-alert" class="alert d-none mt-3 mb-0" role="alert"></div>
+      </div>
+
+      <!-- Managed Events Table -->
+      <div class="custom-table-card mb-4">
+        <div class="p-3 border-bottom d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <h5 class="fw-bold text-dark mb-0">My Hosted Events</h5>
+            <span class="badge bg-light text-dark border" id="events-badge-count">0 Events</span>
+          </div>
+          <!-- Status Filter Tabs / Pills -->
+          <div class="d-flex flex-wrap gap-1" id="organizer-filter-pills">
+            <button class="btn btn-sm btn-primary rounded-pill px-3 org-filter-btn active" data-status="all">All</button>
+            <button class="btn btn-sm btn-outline-warning rounded-pill px-3 org-filter-btn" data-status="pending">Pending</button>
+            <button class="btn btn-sm btn-outline-success rounded-pill px-3 org-filter-btn" data-status="approved">Approved</button>
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 org-filter-btn" data-status="rejected">Rejected</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 org-filter-btn" data-status="cancelled">Cancelled</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table custom-table mb-0">
+            <thead>
+              <tr>
+                <th>Event Title</th>
+                <th>Category</th>
+                <th>Date & Time</th>
+                <th>Venue</th>
+                <th>Capacity / RSVPs</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="events-table-body">
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">Loading your events...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Attendees Management Panel -->
+      <div class="custom-table-card" id="attendees-panel">
+        <div class="p-3 border-bottom d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div>
+            <h5 class="fw-bold text-dark mb-1">Event Attendees & Registrations</h5>
+            <div class="small text-muted" id="attendees-header-filter">Select an event or view recent registrations</div>
+          </div>
+          <div class="d-flex gap-2">
+            <select id="attendee-event-select" class="form-select form-select-sm" style="max-width: 250px;">
+              <option value="all">All Hosted Events</option>
+            </select>
+            <button id="export-attendees-btn" class="btn btn-sm btn-outline-secondary rounded-2" title="Export CSV">
+              <i class="bi bi-download me-1"></i> CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table custom-table mb-0">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Contact</th>
+                <th>Event</th>
+                <th>RSVP Status</th>
+                <th>Registered At</th>
+                <th>Check-in Action</th>
+              </tr>
+            </thead>
+            <tbody id="attendees-table-body">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">Loading attendees...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/navbar.js"></script>
+
+  <script>
+    let myEvents = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.requireAuth(['organizer', 'admin'])) return;
+
+      const user = Auth.getCurrentUser();
+      document.getElementById('sidebar-org-name').innerText = user.name;
+      document.getElementById('sidebar-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+      if (!user.isVerified && user.role === 'organizer') {
+        document.getElementById('unverified-banner').classList.remove('d-none');
+        document.getElementById('sidebar-org-status').className = 'badge bg-warning text-dark small';
+        document.getElementById('sidebar-org-status').innerText = 'Pending Verification';
+      }
+
+      await loadOverviewMetrics();
+      await loadMyEvents();
+      await loadAttendees('all');
+      setupCheckInTerminal();
+      setupOrganizerEventFilters();
+
+      document.getElementById('refresh-dashboard-btn').addEventListener('click', async () => {
+        await loadOverviewMetrics();
+        await loadMyEvents();
+        await loadAttendees(document.getElementById('attendee-event-select').value);
+        Utils.showToast('Dashboard refreshed', 'info', 1500);
+      });
+
+      document.getElementById('attendee-event-select').addEventListener('change', (e) => {
+        loadAttendees(e.target.value);
+      });
+
+      document.getElementById('export-attendees-btn').addEventListener('click', () => {
+        const selectedEvent = document.getElementById('attendee-event-select').value;
+        const query = selectedEvent !== 'all' ? `&eventId=${selectedEvent}` : '';
+        window.location.href = `/api/reports/export-csv?type=attendees${query}`;
+      });
+    });
+
+    async function loadOverviewMetrics() {
+      try {
+        const res = await api.get('/api/reports/organizer-overview');
+        if (res.success && res.data) {
+          const d = res.data;
+          document.getElementById('stat-total-events').innerText = d.totalEvents || 0;
+          document.getElementById('stat-upcoming-events').innerText = d.upcomingEvents || 0;
+          document.getElementById('stat-total-regs').innerText = d.totalRegistrations || 0;
+          document.getElementById('stat-total-attended').innerText = d.totalAttendees || 0;
+          document.getElementById('stat-attendance-rate').innerText = `${d.attendanceRate || 0}%`;
+          document.getElementById('stat-avg-rating').innerText = Number(d.averageRating || 0).toFixed(1);
+        }
+      } catch (e) {
+        console.warn('Metrics error:', e.message);
+      }
+    }
+
+    let currentEventStatusFilter = 'all';
+
+    function setupOrganizerEventFilters() {
+      document.querySelectorAll('.org-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.org-filter-btn').forEach(b => {
+            b.className = 'btn btn-sm btn-outline-secondary rounded-pill px-3 org-filter-btn';
+          });
+          const st = btn.getAttribute('data-status');
+          currentEventStatusFilter = st;
+          if (st === 'all') btn.className = 'btn btn-sm btn-primary rounded-pill px-3 org-filter-btn active';
+          else if (st === 'pending') btn.className = 'btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 org-filter-btn active';
+          else if (st === 'approved') btn.className = 'btn btn-sm btn-success rounded-pill px-3 org-filter-btn active';
+          else if (st === 'rejected') btn.className = 'btn btn-sm btn-danger rounded-pill px-3 org-filter-btn active';
+          else if (st === 'cancelled') btn.className = 'btn btn-sm btn-secondary rounded-pill px-3 org-filter-btn active';
+          renderMyEventsTable();
+        });
+      });
+    }
+
+    async function loadMyEvents() {
+      const tbody = document.getElementById('events-table-body');
+      const user = Auth.getCurrentUser();
+
+      try {
+        const res = await api.get('/api/events', {
+          organizer: user.role === 'admin' ? '' : user._id,
+          status: 'all',
+          limit: 50,
+        });
+
+        if (!res.success || !res.data) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Failed to load events.</td></tr>';
+          return;
+        }
+
+        myEvents = res.data.events || [];
+
+        // Populate attendee event select filter
+        const select = document.getElementById('attendee-event-select');
+        select.innerHTML = '<option value="all">All Hosted Events</option>';
+        myEvents.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e._id;
+          opt.textContent = e.title;
+          select.appendChild(opt);
+        });
+
+        // Check if query param eventId exists
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('eventId')) {
+          select.value = urlParams.get('eventId');
+        }
+
+        renderMyEventsTable();
+      } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-danger text-center">${error.message}</td></tr>`;
+      }
+    }
+
+    function renderMyEventsTable() {
+      const tbody = document.getElementById('events-table-body');
+      let filtered = myEvents;
+      if (currentEventStatusFilter === 'all') {
+        filtered = myEvents.filter(e => e.status !== 'cancelled' && e.status !== 'archived');
+      } else if (currentEventStatusFilter === 'pending') {
+        filtered = myEvents.filter(e => e.status === 'pending');
+      } else if (currentEventStatusFilter === 'approved') {
+        filtered = myEvents.filter(e => e.status === 'approved' || e.status === 'published');
+      } else if (currentEventStatusFilter === 'rejected') {
+        filtered = myEvents.filter(e => e.status === 'rejected');
+      } else if (currentEventStatusFilter === 'cancelled') {
+        filtered = myEvents.filter(e => e.status === 'cancelled');
+      }
+
+      const activeTotal = myEvents.filter(e => e.status !== 'cancelled' && e.status !== 'archived').length;
+      document.getElementById('events-badge-count').innerText = `${filtered.length} of ${activeTotal} Events`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+              <h6 class="fw-bold">No ${currentEventStatusFilter === 'all' ? '' : currentEventStatusFilter.charAt(0).toUpperCase() + currentEventStatusFilter.slice(1)} Events</h6>
+              <p class="text-muted small mb-3">No events match the selected status filter.</p>
+              ${myEvents.length === 0 ? '<a href="/create-event.html" class="btn btn-sm btn-primary rounded-pill px-4">Create First Event</a>' : ''}
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(e => {
+        const cap = e.capacity;
+        const reg = e.registeredCount || 0;
+        const percent = Math.min(100, Math.round((reg / cap) * 100));
+
+        let statusDisplay = Utils.getStatusBadge(e.status);
+        if (e.status === 'rejected') {
+          statusDisplay += `<div class="small text-danger mt-1" style="font-size:0.75rem;"><i class="bi bi-info-circle me-1"></i>${Utils.escapeHtml(e.rejectionReason || 'Rejected by Admin')}</div>`;
+        } else if (e.status === 'pending') {
+          statusDisplay += `<div class="small text-warning mt-1" style="font-size:0.75rem;"><i class="bi bi-clock me-1"></i>Awaiting Review</div>`;
+        } else if (e.status === 'cancelled') {
+          statusDisplay += `<div class="small text-danger mt-1" style="font-size:0.75rem;"><i class="bi bi-x-circle me-1"></i>Cancelled${e.cancellationReason ? ': ' + Utils.escapeHtml(e.cancellationReason) : ''}</div>`;
+        }
+
+        return `
+          <tr>
+            <td>
+              <div class="fw-bold text-dark">
+                <a href="/event-details.html?id=${e._id}" class="text-dark text-decoration-none">
+                  ${Utils.escapeHtml(e.title)}
+                </a>
+              </div>
+            </td>
+            <td>${Utils.getCategoryBadge(e.category)}</td>
+            <td>
+              <div class="small fw-semibold text-dark">${Utils.formatDate(e.startDate, { shortMonth: true })}</div>
+              <div class="text-muted" style="font-size:0.75rem;">${Utils.formatTime(e.startTime)} - ${Utils.formatTime(e.endTime)}</div>
+            </td>
+            <td>
+              <span class="small text-truncate d-inline-block" style="max-width:150px;">
+                <i class="bi bi-geo-alt me-1 text-danger"></i>${Utils.escapeHtml(e.venue?.name || 'Venue')}
+              </span>
+            </td>
+            <td style="min-width: 140px;">
+              <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>${reg}/${cap}</span>
+                <span>${percent}%</span>
+              </div>
+              <div class="progress" style="height: 5px;">
+                <div class="progress-bar ${percent >= 90 ? 'bg-danger' : 'bg-primary'}" role="progressbar" style="width: ${percent}%;"></div>
+              </div>
+            </td>
+            <td>${statusDisplay}</td>
+            <td class="text-end">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light border py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                  <li><a class="dropdown-item" href="/event-details.html?id=${e._id}"><i class="bi bi-eye me-2 text-primary"></i> View Details</a></li>
+                  <li><a class="dropdown-item" href="/edit-event.html?id=${e._id}"><i class="bi bi-pencil me-2 text-secondary"></i> Edit Event</a></li>
+                  <li><a class="dropdown-item" href="/edit-event.html?id=${e._id}&reschedule=true"><i class="bi bi-calendar2-range me-2 text-warning"></i> Reschedule</a></li>
+                  <li><a class="dropdown-item" href="javascript:void(0)" onclick="filterAttendeesByEvent('${e._id}')"><i class="bi bi-people me-2 text-info"></i> View Attendees</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  ${e.status !== 'cancelled' ? `<li><a class="dropdown-item text-warning" href="javascript:void(0)" onclick="cancelEvent('${e._id}')"><i class="bi bi-x-circle me-2"></i> Cancel Event</a></li>` : ''}
+                  <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="archiveEvent('${e._id}')"><i class="bi bi-trash me-2"></i> Archive (Delete)</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function loadAttendees(eventIdFilter) {
+      const tbody = document.getElementById('attendees-table-body');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Loading attendees...</td></tr>';
+
+      try {
+        let endpoint = '/api/registrations';
+        const params = { limit: 50 };
+        if (eventIdFilter && eventIdFilter !== 'all') {
+          params.event = eventIdFilter;
+        }
+
+        const res = await api.get(endpoint, params);
+        if (!res.success || !res.data) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-danger text-center">Failed to load attendees.</td></tr>';
+          return;
+        }
+
+        const registrations = res.data.registrations || [];
+
+        if (registrations.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No attendees found for this filter.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = registrations.map(reg => {
+          const student = reg.student || {};
+          const isCheckedIn = reg.status === 'checked-in';
+
+          return `
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="user-nav-avatar bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width:32px; height:32px; font-size:0.8rem;">
+                    ${student.name ? student.name.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                  <div>
+                    <div class="fw-bold small text-dark">${Utils.escapeHtml(student.name || 'Student')}</div>
+                    <div class="text-muted" style="font-size:0.75rem;">${student.email || ''}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="small text-dark">${student.phone || 'N/A'}</div>
+              </td>
+              <td>
+                <div class="small fw-semibold text-truncate" style="max-width: 180px;">
+                  ${Utils.escapeHtml(reg.event?.title || 'Event')}
+                </div>
+              </td>
+              <td>${Utils.getStatusBadge(reg.status)}</td>
+              <td>
+                <div class="small text-muted">${Utils.formatDate(reg.registeredAt, { shortMonth: true })}</div>
+                <div class="fw-mono" style="font-size:0.75rem;">${reg.qrCode}</div>
+              </td>
+              <td>
+                ${isCheckedIn ? `
+                  <span class="badge bg-success bg-opacity-10 text-success p-2">
+                    <i class="bi bi-check-circle-fill me-1"></i> Checked-In
+                  </span>
+                ` : `
+                  <button class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3" onclick="manualCheckIn('${reg._id}', '${Utils.escapeHtml(student.name || '')}')">
+                    <i class="bi bi-check2 me-1"></i> Mark Check-in
+                  </button>
+                `}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">${err.message}</td></tr>`;
+      }
+    }
+
+    function setupCheckInTerminal() {
+      const form = document.getElementById('check-in-form');
+      const input = document.getElementById('check-in-input');
+      const alertBox = document.getElementById('check-in-alert');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = input.value.trim();
+        if (!code) return;
+
+        alertBox.classList.add('d-none');
+
+        try {
+          const res = await api.post('/api/registrations/check-in', { qrCode: code });
+          if (res.success) {
+            alertBox.className = 'alert alert-success mt-3 mb-0';
+            alertBox.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>${res.message}`;
+            alertBox.classList.remove('d-none');
+            input.value = '';
+            Utils.showToast(res.message, 'success');
+            await loadOverviewMetrics();
+            await loadAttendees(document.getElementById('attendee-event-select').value);
+          }
+        } catch (error) {
+          alertBox.className = 'alert alert-danger mt-3 mb-0';
+          alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${error.message}`;
+          alertBox.classList.remove('d-none');
+          Utils.showToast(error.message, 'error');
+        }
+      });
+    }
+
+    async function manualCheckIn(regId, studentName) {
+      try {
+        const res = await api.post(`/api/registrations/${regId}/check-in`, {});
+        if (res.success) {
+          Utils.showToast(`Checked in ${studentName || 'attendee'}!`, 'success');
+          await loadOverviewMetrics();
+          await loadAttendees(document.getElementById('attendee-event-select').value);
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+
+    function filterAttendeesByEvent(eventId) {
+      const select = document.getElementById('attendee-event-select');
+      select.value = eventId;
+      loadAttendees(eventId);
+      document.getElementById('attendees-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function cancelEvent(eventId) {
+      const reason = prompt('Specify cancellation reason for registered students:') || 'Cancelled by organizer';
+      if (!confirm('Cancel this event? It will be marked as cancelled and hidden from active listings. Registered students will be notified.')) return;
+      try {
+        const res = await api.delete(`/api/events/${eventId}?action=cancel&reason=${encodeURIComponent(reason)}`);
+        if (res.success) {
+          Utils.showToast('Event successfully cancelled and hidden from active listings.', 'info');
+          await loadMyEvents();
+          await loadOverviewMetrics();
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+
+    async function archiveEvent(eventId) {
+      if (!confirm('Are you sure you want to archive this event? Archiving will permanently DELETE the event from the database.')) return;
+      try {
+        const res = await api.delete(`/api/events/${eventId}?action=archive`);
+        if (res.success) {
+          Utils.showToast('Event archived and permanently deleted from MongoDB.', 'success');
+          await loadMyEvents();
+          await loadOverviewMetrics();
+        }
+      } catch (e) {
+        Utils.showToast(e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
